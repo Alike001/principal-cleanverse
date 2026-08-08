@@ -15,6 +15,7 @@ test-results/
 .playwright-mcp/
 pnpm-debug.log*
 *.tsbuildinfo
+.principal-keystore-password
 
 # Foundry
 contracts/cache/
