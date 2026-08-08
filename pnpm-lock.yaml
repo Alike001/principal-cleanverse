@@ -21,6 +21,9 @@ importers:
         specifier: 0.0.1
         version: 0.0.1
     devDependencies:
+      '@openzeppelin/contracts':
+        specifier: 5.6.1
+        version: 5.6.1
       '@types/node':
         specifier: 24.10.13
         version: 24.10.13
@@ -252,6 +255,9 @@ packages:
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
+
+  '@openzeppelin/contracts@5.6.1':
+    resolution: {integrity: sha512-Ly6SlsVJ3mj+b18W3R8gNufB7dTICT105fJhodGAGgyC2oqnBAhqSiNDJ8V8DLY05cCz81GLI0CU5vNYA1EC/w==}
 
   '@oxc-project/types@0.143.0':
     resolution: {integrity: sha512-u6JZdLBTLotrNC9Vd6vPssINdzcCzleKAH6EJKImQb7GtYvX5keN2dxkoK44stCc4tffE6QQRtZTXVSzsLUlWA==}
@@ -883,6 +889,8 @@ snapshots:
 
   '@next/swc-win32-x64-msvc@16.2.9':
     optional: true
+
+  '@openzeppelin/contracts@5.6.1': {}
 
   '@oxc-project/types@0.143.0': {}
 
