@@ -1,7 +1,5 @@
+import { ContractPassport } from "@/components/contract-passport";
+
 export default function Home() {
-  return (
-    <main>
-      <p>Principal is being prepared for Monad testnet.</p>
-    </main>
-  );
+  return <ContractPassport />;
 }
