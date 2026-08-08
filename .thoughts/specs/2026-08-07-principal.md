@@ -203,17 +203,17 @@ If the sandbox cannot support contract-held CVA, current principal-state verific
 - Cleanverse supplied Validator address `0xaC7e5179C2C7f03f209136886c172eb34F161792`. Read-only Monad calls confirmed its proxy bytecode, implementation bytecode, `isRegistered`, and `getRulesV2` behavior.
 - A CVA vault must receive CVI through `registerApass(pool, aToken)` before it can hold or transfer CVA.
 - Cleanverse support confirmed that the issued account has the requested permissions.
+- A live UAT query returned Monad `ausdc` at `0xaC0893567D43C3E7e6e35a72803df05416C1f20D` with 6 decimals, backed by origin `usdc` at `0x534b2f3A21130d7a60830c2Df862319e593943A3`.
 - Current Monad testnet uses chain ID `10143` and MON for gas. Current RPC and explorer values must remain configurable because official pages expose both current and legacy URLs.
 
 Full endpoint analysis is saved in [`research/cleanverse-v5.6-integration.md`](../../research/cleanverse-v5.6-integration.md).
 
 ## Remaining Open Questions
 
-1. Which A-Token pair is currently returned for `chain: monad`?
-2. Does Cleanverse registration or transfer eligibility react automatically when the registered contract's `owner()` changes?
-3. What exact ERC-20-compatible transfer behavior and custom errors does the selected Monad A-Token expose?
-4. Which exact signature bytes does the live grant endpoint accept where the v5.6 and pinned-guide wording differs?
-5. Which issued test wallet can safely be frozen and reactivated during the demo without affecting other builders?
+1. Does Cleanverse registration or transfer eligibility react automatically when the registered contract's `owner()` changes?
+2. What exact ERC-20-compatible transfer behavior and custom errors does the selected Monad A-Token expose?
+3. Which exact signature bytes does the live grant endpoint accept where the v5.6 and pinned-guide wording differs?
+4. Which issued test wallet can safely be frozen and reactivated during the demo without affecting other builders?
 
 ## Source References
 

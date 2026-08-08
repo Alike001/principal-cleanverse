@@ -51,10 +51,9 @@ The direct onchain Cleanverse Validator path is selected. The pinned guide suppl
 
 ## Open Questions
 
-1. Which Monad A-Token pair is currently returned by `query_deposit_atoken_list`?
-2. Does Cleanverse automatically react to a registered pool's `owner()` change?
-3. Which sandbox wallet may be safely frozen and reactivated for the demonstration?
-4. The v5.6 API guide and pinned Validator guide phrase the registration signature differently. Which exact byte sequence does the live endpoint accept?
+1. Does Cleanverse automatically react to a registered pool's `owner()` change?
+2. Which sandbox wallet may be safely frozen and reactivated for the demonstration?
+3. The v5.6 API guide and pinned Validator guide phrase the registration signature differently. Which exact byte sequence does the live endpoint accept?
 
 ## Prototype Reintegration Gate
 

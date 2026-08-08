@@ -73,6 +73,17 @@ Principal must treat only nested code `4` as eligible. The endpoint returns a re
 
 Validator mutations and A-Pass status updates return transaction hashes. Those hashes can anchor Principal's evidence timeline.
 
+### Live Monad CVA inventory
+
+A real read-only `query_deposit_atoken_list` request succeeded on 2026-08-08 with top-level code `0000` and returned one supported Monad pair:
+
+- Origin token: `usdc`, address `0x534b2f3A21130d7a60830c2Df862319e593943A3`.
+- CVA: `ausdc`, address `0xaC0893567D43C3E7e6e35a72803df05416C1f20D`, 6 decimals.
+- AccessCore: `0x8F118338a1fa41E7Fa86Be19A4e8B99Ed58A6EcC`.
+- A-Pass contract: `0xbA82D189540CaC9DC6FF46B6837CaC1BFdEC58B9`.
+
+These values came from the live UAT response for `chain: monad` and replace all static token examples for the selected build.
+
 ## Selected technical mechanism
 
 1. Deploy one `PrincipalRegistry` that can receive Cleanverse `REGISTER_ROLE` and one non-proxy `PrincipalVault` whose `owner()` returns the verified principal wallet.
@@ -105,12 +116,11 @@ Monad does not use ETH for gas. The build needs testnet MON. Bridged test ETH do
 
 ## Remaining blockers before implementation
 
-1. Query the live Monad A-Token list with the issued API ID.
-2. Grant the Principal registry `REGISTER_ROLE`, then prove `registerV2` and `registerApass` on Monad testnet.
-3. Test whether the registered vault can hold and transfer the selected CVA after `registerApass`.
-4. Confirm whether Validator registration or transfer policy changes automatically when the vault owner changes.
-5. Select a safe test wallet for the freeze and reactivation demonstration.
-6. Acquire testnet MON for the deployer wallet before any Monad deployment.
+1. Grant the Principal registry `REGISTER_ROLE`, then prove `registerV2` and `registerApass` on Monad testnet.
+2. Test whether the registered vault can hold and transfer the selected CVA after `registerApass`.
+3. Confirm whether Validator registration or transfer policy changes automatically when the vault owner changes.
+4. Select a safe test wallet for the freeze and reactivation demonstration.
+5. Acquire testnet MON for the deployer wallet before any Monad deployment.
 
 ## Submission requirements received after registration
 
