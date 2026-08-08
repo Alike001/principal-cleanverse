@@ -38,7 +38,8 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
     mapping(address principal => uint64 nonce) public nextNonce;
     mapping(address vault => uint256 passportId) public activePassportForVault;
 
-    event CleanversePoolRegistered(address indexed vault, bytes32 indexed ruleHash);
+    event CleanversePoolRuleRegistered(address indexed vault, bytes32 indexed ruleHash);
+    event CleanverseVaultCviRegistered(address indexed vault, address indexed asset);
     event PassportRegistered(
         uint256 indexed passportId,
         address indexed principal,
@@ -60,12 +61,22 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
         expectedChainId = expectedChainId_;
     }
 
-    /// @notice Uses this registry's Cleanverse REGISTER_ROLE to give a vault a pool rule and CVI for CVA holding.
-    function registerCleanversePool(address vault, IAPassComplianceValidator.RuleV2 calldata rule) external onlyOwner {
+    /// @notice Registers the pool's RuleV2 through this registry's Cleanverse REGISTER_ROLE.
+    /// @dev This is intentionally separate from registerVaultCvi so both real Validator writes can confirm independently.
+    function registerCleanversePoolRule(address vault, IAPassComplianceValidator.RuleV2 calldata rule)
+        external
+        onlyOwner
+    {
         if (vault.code.length == 0) revert InvalidAddress();
         validator.registerV2(vault, rule);
+        emit CleanversePoolRuleRegistered(vault, keccak256(abi.encode(rule)));
+    }
+
+    /// @notice Gives an already registered pool the CVI required to hold the configured CVA.
+    function registerVaultCvi(address vault) external onlyOwner {
+        if (!validator.isRegistered(vault)) revert VaultNotRegistered(vault);
         validator.registerApass(vault, asset);
-        emit CleanversePoolRegistered(vault, keccak256(abi.encode(rule)));
+        emit CleanverseVaultCviRegistered(vault, asset);
     }
 
     /// @notice A vault controller creates a fresh passport. A prior vault passport becomes inactive.

@@ -31,7 +31,9 @@ contract PrincipalRegistryTest is Test {
         token.mint(address(vault), 1_000e6);
 
         vm.prank(ADMIN);
-        registry.registerCleanversePool(address(vault), _rule());
+        registry.registerCleanversePoolRule(address(vault), _rule());
+        vm.prank(ADMIN);
+        registry.registerVaultCvi(address(vault));
         validator.setEligible(address(vault), PRINCIPAL, true);
         validator.setEligible(address(token), RECIPIENT, true);
     }
