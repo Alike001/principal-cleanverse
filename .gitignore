@@ -26,10 +26,13 @@ recordings/private/
 fixtures/private/
 
 # Private working notes and application material
+AGENTS.md
 PROMPTS.md
 application/application-form.md
+design.doc.md
 handoff.md
 log.md
+research-intake.md
 
 # Editor and operating system files
 .DS_Store
