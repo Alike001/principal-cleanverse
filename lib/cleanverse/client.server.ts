@@ -33,6 +33,7 @@ export class CleanverseClient {
   constructor(
     private readonly config: CleanverseConfig = loadCleanverseConfig(),
     private readonly fetcher: FetchLike = fetch,
+    private readonly timeoutMs = 10_000,
   ) {}
 
   async queryDepositATokenList(chain: "monad" = "monad"): Promise<DepositATokenList> {
@@ -59,9 +60,11 @@ export class CleanverseClient {
         headers: {
           "Content-Type": "application/json",
           "api-id": this.config.apiId,
+          "X-Request-ID": crypto.randomUUID(),
         },
         body: JSON.stringify(requestBody),
         cache: "no-store",
+        signal: AbortSignal.timeout(this.timeoutMs),
       });
     } catch (cause) {
       throw new CleanverseTransportError(`Cleanverse request failed: ${String(cause)}`);

@@ -31,3 +31,12 @@ export function loadCleanverseConfig(env = process.env): CleanverseConfig {
 
   return { apiId, apiKey, baseUrl };
 }
+
+export function loadDemoPrincipalAddress(env = process.env): `0x${string}` {
+  const address = required(env.DEMO_PRINCIPAL_ADDRESS, "DEMO_PRINCIPAL_ADDRESS");
+  if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+    throw new CleanverseConfigurationError("DEMO_PRINCIPAL_ADDRESS must be an EVM address.");
+  }
+
+  return address as `0x${string}`;
+}

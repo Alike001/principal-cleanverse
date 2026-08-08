@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { CleanverseClient } from "../lib/cleanverse/client.server";
 import { encryptCleanversePayload } from "../lib/cleanverse/crypto.server";
 import { CleanverseResponseError } from "../lib/cleanverse/errors";
+import { getMonadPrincipalStatus } from "../lib/cleanverse/monad-status.server";
 import type { CleanverseConfig } from "../lib/cleanverse/types";
 
 const apiKey = Buffer.alloc(32, 7).toString("base64");
@@ -86,5 +87,32 @@ describe("CleanverseClient", () => {
     expect(wirePayload).toHaveProperty("data");
     expect(wirePayload.data).not.toContain("PrincipalWallet01");
     expect(wirePayload).not.toHaveProperty("apiKey");
+  });
+
+  it("reports a missing A-Pass without exposing a principal wallet to the browser status model", async () => {
+    const status = await getMonadPrincipalStatus(
+      {
+        queryDepositATokenList: vi.fn().mockResolvedValue({
+          chain: "monad",
+          tokens: [
+            {
+              atoken: { symbol: "ausdc", name: "aUSDC", decimals: 6, address: "0xasset", icon: "" },
+              origin_token: { symbol: "usdc", name: "USDC", decimals: 6, address: "0xorigin", icon: "" },
+              accesscore_address: "0xcore",
+              apass_address: "0xpass",
+            },
+          ],
+        }),
+        queryAPass: vi.fn().mockRejectedValue(new CleanverseResponseError("A-Pass not found", "0002")),
+      },
+      "0x0000000000000000000000000000000000000001",
+    );
+
+    expect(status).toEqual({
+      chain: "monad",
+      principalCvi: "not_registered",
+      assets: [{ symbol: "ausdc", name: "aUSDC", decimals: 6, contractAddress: "0xasset" }],
+    });
+    expect(JSON.stringify(status)).not.toContain("0000000000000000000000000000000000000001");
   });
 });
