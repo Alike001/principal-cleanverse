@@ -12,13 +12,25 @@ Source: the official Cleanverse Build: Trusted Assets rubric saved in `research/
 | UX and Demo, 15 | The landing page explains the problem, the workspace reruns the deployed passport decision, and the evidence timeline links to public proof. Judges do not need a wallet or Cleanverse credentials to inspect it. | Load `/`, open `/workspace`, run `Check authority`, follow the evidence link, and open the public Monad transaction. Use `/docs` for the architecture and Monad setup. | Good local product flow with a real read-only action and low judge friction. | A public live URL, final video, and submission screenshots are still required. Until the live deployment exists, this criterion is only partially complete. |
 | Scalability Potential, 10 | The passport mechanism can be applied to other contract-held CVA workflows by binding each deployed contract to its principal, code, asset, and mandate while Cleanverse remains the identity and asset source of truth. | Show the separation between the reusable factory, vault, registry decision, Cleanverse Validator, and CVA transfer layer. | Credible architecture, limited shipped breadth. | This is the weakest criterion. The product currently supports one principal, one immutable vault, one CVA, and one transfer capability. It does not ship a multi-vault registry, SDK, indexer, multi-chain deployment, or institutional pilot. Present these as future scale paths, not completed features. |
 
+## Additional published considerations
+
+These considerations appear in the official event guidance but do not have separate point allocations.
+
+| Consideration | Principal evidence | Honest limit |
+| --- | --- | --- |
+| Meaningful Cleanverse use | CVI identifies the principal, the CCP Validator governs the registered vault pool, and CVA enforces identity-aware aUSDC transfer rules. Removing Cleanverse breaks the core mechanism. | The proof uses one CVA and one permissive RuleV2 pool. |
+| Real financial infrastructure problem | Institutions can verify a wallet today, but they still need narrow, inspectable authority for the exact contract acting over verified assets. | The pain is supported by the sponsor gap and protocol architecture, not a signed institutional pilot. |
+| Pilotability | A vault integrator can inspect the deployed factory, passport fields, decision enum, and public receipts without receiving Cleanverse credentials. | No institution or merchant has agreed to a pilot yet. |
+| Improved trust and compliance | The same deployed passport returns a deterministic result for the same current state, and failed checks block authority with named reason codes. | Principal does not determine legal ownership, custody, licensing, or regulatory approval. |
+| Technical feasibility | The full flow is deployed on Monad, aUSDC moved through the vault, and the public repository contains repeatable web and Foundry tests. | There is no independent audit or production monitoring service. |
+
 ## Priority gaps before submission
 
 1. Deploy the public web app, then test the exact judge path without local secrets.
-2. Record the final demo and save screenshots of the passport, registration evidence, and permitted transfer receipt.
+2. Record the final demo and save screenshots of the permitted live preflight, over-cap blocked preflight, registration evidence, and permitted transfer receipt.
 3. Keep the scalability claim architectural and specific. Do not imply that multi-vault or multi-chain support already exists.
 4. Avoid unsupported commercial claims. The strongest case is the sponsor gap, complete Cleanverse lifecycle integration, and public onchain evidence.
 
 ## Four-sentence pitch
 
-Cleanverse verifies people and assets, but institutions still need to know which exact smart contract is acting for a verified controller and where that authority ends. Principal is a Contract Passport for compliant smart-contract operations on Monad. It binds a live CVI principal to factory-created vault bytecode, one aUSDC capability, a per-transfer cap, expiry, and nonce, checks the vault's CCP policy before execution, and lets the CVA enforce its own CVI rule during transfer. That makes delegated onchain operations inspectable, limited, and reusable for institutions that cannot accept opaque contract authority over verified assets.
+Cleanverse verifies people and assets, but institutions still need to know which exact smart contract is acting for a verified controller and where that authority ends. Principal is a Contract Passport for compliant smart-contract operations on Monad. It binds a live CVI principal to factory-created vault bytecode, one aUSDC capability, a per-transfer cap, expiry, and nonce, checks the vault's CCP policy before execution, and lets the CVA enforce its own CVI rule during transfer. That makes delegated onchain operations inspectable and limited, which institutions need before verified assets can safely move through smart contracts at scale.
