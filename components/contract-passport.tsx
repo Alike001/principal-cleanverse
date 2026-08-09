@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { principalDeployment } from "@/lib/principal/deployment";
 import { principalPassport, type EvidenceItem } from "@/lib/principal/passport";
 import { ArrowIcon, AssetIcon, BlockIcon, CheckIcon, CopyIcon, ExternalIcon, Mark, PersonIcon, RefreshIcon, VaultIcon } from "./icons";
+import { PassportIssuer } from "./passport-issuer";
 
 type LivePassport = {
   registry: string;
@@ -220,6 +221,8 @@ export function ContractPassport() {
           </div>
         </aside>
       </section>
+
+      <PassportIssuer />
 
       <section className="evidence-section" id="evidence" aria-labelledby="evidence-title">
         <div className="section-heading"><div><p>Evidence timeline</p><h2 id="evidence-title">Recorded testnet proof</h2></div><span>Historical snapshot · Aug 9, 2026</span></div>
