@@ -137,3 +137,6 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .controller-shell .issuer-section { margin-top: 47px; }
 @media (max-width: 950px) { .controller-shell { padding-left: 22px; padding-right: 22px; } }
 @media (max-width: 660px) { .workspace-site-actions { gap: 10px; }.workspace-back-link { font-size: 11px; }.controller-shell { padding: 46px 15px 60px; } }
+
+/* Keep adjacent Passport evidence actions readable as separate controls. */
+.passport-footer > div { display: flex; flex-wrap: wrap; gap: 10px; }
