@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { principalDeployment } from "@/lib/principal/deployment";
+import { createPassportLink } from "@/lib/principal/passport-link";
 import { principalPassport, type EvidenceItem } from "@/lib/principal/passport";
 import { ArrowIcon, AssetIcon, BlockIcon, CheckIcon, CopyIcon, ExternalIcon, Mark, PersonIcon, RefreshIcon, VaultIcon } from "./icons";
 import { PassportIssuer } from "./passport-issuer";
@@ -79,6 +80,40 @@ export function ContractPassport() {
     message: string;
   }>({ state: "idle", message: "Enter a recipient and amount to query the selected Passport on Monad." });
 
+  async function loadPassportByTarget(nextRegistry: string, nextPassportId: string) {
+    setLoadState({ state: "loading", message: "Reading the Passport tuple from Monad." });
+    setPreflight({ state: "idle", message: "Load complete. Enter a recipient and amount to run a live check." });
+    try {
+      const response = await fetch("/api/principal/passport", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ registry: nextRegistry, passportId: nextPassportId }),
+      });
+      const data: LivePassport & { error?: string } = await response.json();
+      if (!response.ok || !data.vault || !data.passportId) {
+        setLoadState({ state: "error", message: data.error || "Passport lookup is unavailable." });
+        return;
+      }
+      setLivePassport(data);
+      setRegistry(data.registry);
+      setPassportId(data.passportId);
+      setRecipient(data.vault);
+      setLoadState({ state: "idle", message: data.principal === "0x0000000000000000000000000000000000000000" ? "No Passport exists at this ID." : "Live Passport loaded from Monad." });
+    } catch {
+      setLoadState({ state: "error", message: "Passport lookup is unavailable. No authority is assumed." });
+    }
+  }
+
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const linkedRegistry = query.get("registry");
+    const linkedPassport = query.get("passport");
+    if (!linkedRegistry || !linkedPassport) return;
+    setRegistry(linkedRegistry);
+    setPassportId(linkedPassport);
+    void loadPassportByTarget(linkedRegistry, linkedPassport);
+  }, []);
+
   const isHistoricalDefault = !livePassport;
   const passport = livePassport;
   const displayRegistry = passport?.registry || principalPassport.registryAddress;
@@ -93,26 +128,15 @@ export function ContractPassport() {
 
   async function loadPassport(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setLoadState({ state: "loading", message: "Reading the Passport tuple from Monad." });
-    setPreflight({ state: "idle", message: "Load complete. Enter a recipient and amount to run a live check." });
+    await loadPassportByTarget(registry, passportId);
+  }
+
+  async function copyPassportLink() {
     try {
-      const response = await fetch("/api/principal/passport", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ registry, passportId }),
-      });
-      const data: LivePassport & { error?: string } = await response.json();
-      if (!response.ok || !data.vault || !data.passportId) {
-        setLoadState({ state: "error", message: data.error || "Passport lookup is unavailable." });
-        return;
-      }
-      setLivePassport(data);
-      setRegistry(data.registry);
-      setPassportId(data.passportId);
-      setRecipient(data.vault);
-      setLoadState({ state: "idle", message: data.principal === "0x0000000000000000000000000000000000000000" ? "No Passport exists at this ID." : "Live Passport loaded from Monad." });
+      await navigator.clipboard?.writeText(createPassportLink(window.location.origin, displayRegistry, displayPassportId));
+      setLoadState({ state: "idle", message: "Share link copied. It opens this exact registry and Passport live from Monad." });
     } catch {
-      setLoadState({ state: "error", message: "Passport lookup is unavailable. No authority is assumed." });
+      setLoadState({ state: "error", message: "Could not copy the share link. Your Passport remains unchanged." });
     }
   }
 
@@ -185,7 +209,7 @@ export function ContractPassport() {
             <div className="relationship-node is-verified"><AssetIcon size={19} /><span><strong>CVA transfer</strong><small>{passport ? "Preflighted live" : "0.05 aUSDC proven"}</small></span></div>
           </div>
 
-          <div className="passport-footer"><span>Chain: Monad testnet</span><button type="button" className="text-button" onClick={() => setExpanded(!expanded)}>{expanded ? "Hide evidence details" : "Show evidence details"}</button></div>
+          <div className="passport-footer"><span>Chain: Monad testnet</span><div><button type="button" className="text-button" onClick={copyPassportLink}>Copy inspection link</button><button type="button" className="text-button" onClick={() => setExpanded(!expanded)}>{expanded ? "Hide evidence details" : "Show evidence details"}</button></div></div>
           {expanded && <div className="passport-details"><p>The recorded evidence shows that the factory created this vault, held the Cleanverse registrar role, registered the vault's RuleV2 pool and CVI, and issued Passport #1. A loaded Passport is read directly from its registry. The preflight then re-reads that tuple before evaluating current authority.</p></div>}
         </article>
 
