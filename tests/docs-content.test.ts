@@ -25,6 +25,8 @@ describe("public product navigation", () => {
     expect(workspace).toContain("Check authority");
     expect(workspace).toContain("Load Passport");
     expect(workspace).toContain("Principal registry");
+    expect(workspace).toContain('type="button" onClick={() => void loadPassport()}');
+    expect(workspace).not.toContain('className="passport-locator" onSubmit={loadPassport}');
     expect(workspace).not.toContain("CCP_POOL_NOT_REGISTERED");
     expect(workspace).not.toContain("Transfer unavailable");
     expect(workspace).not.toContain("Pool not registered");

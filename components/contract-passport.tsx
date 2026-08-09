@@ -125,8 +125,7 @@ export function ContractPassport() {
       ? "result-neutral"
       : "result-blocked";
 
-  async function loadPassport(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function loadPassport() {
     await loadPassportByTarget(registry, passportId);
   }
 
@@ -214,14 +213,14 @@ export function ContractPassport() {
 
         <aside className="action-panel" aria-label="Passport inspector">
           <div className="action-heading"><p>Authority inspector</p><h2>Live preflight</h2><span>Read-only Monad eth_call, no wallet required</span></div>
-          <form className="passport-locator" onSubmit={loadPassport}>
+          <div className="passport-locator">
             <label htmlFor="registry">Principal registry</label>
             <input id="registry" value={registry} onChange={(event) => setRegistry(event.target.value)} placeholder="0x… registry address" autoComplete="off" />
             <label htmlFor="passport-id">Passport ID</label>
             <input id="passport-id" inputMode="numeric" value={passportId} onChange={(event) => setPassportId(event.target.value)} placeholder="1" autoComplete="off" />
-            <button className="secondary-action" type="submit" disabled={loadState.state === "loading"}>{loadState.state === "loading" ? "Loading Passport" : "Load Passport"}</button>
+            <button className="secondary-action" type="button" onClick={() => void loadPassport()} disabled={loadState.state === "loading"}>{loadState.state === "loading" ? "Loading Passport" : "Load Passport"}</button>
             <p className={`inspector-message ${loadState.state}`} aria-live="polite">{loadState.message}</p>
-          </form>
+          </div>
           <form onSubmit={runPreflight}>
             <label htmlFor="recipient">Recipient</label>
             <input id="recipient" value={recipient} onChange={(event) => setRecipient(event.target.value)} placeholder="0x… recipient address" autoComplete="off" />
