@@ -5,11 +5,11 @@ Principal makes the controller of a smart contract explicit before it can move a
 ## Current Monad testnet evidence
 
 - A Cleanverse A-Pass is active for the configured principal.
-- Principal factory: [`0xc58d…2719`](https://testnet.monadscan.com/address/0xc58d8746762cfB34066D2ADED4a4A6dD76D62719)
-- Factory-created vault: [`0xa920…e9D`](https://testnet.monadscan.com/address/0xa92026e106562314667479786a914A1D81e09e9D)
+- Principal factory: [`0xcf14…4c8B`](https://testnet.monadscan.com/address/0xcf145f0730989137cce3b94863490e6ac0f84c8b)
+- Factory-created vault: [`0x0355…2837`](https://testnet.monadscan.com/address/0x0355E4c81d0bD4212A1c0402E0438DCd7ED52837)
 - The factory has the Validator `REGISTER_ROLE` onchain.
-- The Validator recognizes the vault pool and the vault's CVI for Monad aUSDC. [Pool registration](https://testnet.monadscan.com/tx/0x92982cd77beb8c390a489ab02d9ad5e93af4671d5fc4d57bde289b3962132853) and [vault CVI registration](https://testnet.monadscan.com/tx/0x68150855070ca880929ac26e430a449ea60a0a331eaa1e3d62c1d70530948f89) both confirmed.
-- No CVA transfer or passport issuance has been claimed or attempted.
+- The Validator recognizes the vault pool and the vault's CVI for Monad aUSDC. [Pool registration](https://testnet.monadscan.com/tx/0x82e52d5f56a8d7103b48c04e77b03a592b552d464edb7057a596aaa0a31f02af) and [vault CVI registration](https://testnet.monadscan.com/tx/0x73b5406864fd228c20bb516098d3a255136fffa411fed5fe4f7963f0e422cc94) both confirmed.
+- [Passport #1](https://testnet.monadscan.com/tx/0xaf20a17858ea78299a3aae5631f7bd59831172d91e7b777b23e0bed6c36ed467) permitted a 0.05 aUSDC vault transfer. [The vault returned the exact amount](https://testnet.monadscan.com/tx/0x43cdf188d90c0a2e8ce01ad566b2e5a9efa3c820bd676f5fa99d19ed551a349f) to the verified principal.
 
 ## Run the product
 

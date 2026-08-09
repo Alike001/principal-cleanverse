@@ -23,7 +23,7 @@ export default function DocsPage() {
       <article>
         <span>02</span>
         <h2>Live testnet state</h2>
-        <p>The principal, factory, and vault are live. The Validator pool and vault CVI are confirmed on Monad. No CVA transfer is claimed.</p>
+        <p>The principal, factory, and vault are live. A 0.05 aUSDC transfer was permitted through Passport #1 and returned from the vault on Monad.</p>
       </article>
       <article>
         <span>03</span>
@@ -35,7 +35,7 @@ export default function DocsPage() {
         <span>04</span>
         <h2>Public evidence</h2>
         <p>Review the source and deployed factory. Cleanverse API docs need a private access code, so this page documents Principal itself.</p>
-        <div className="docs-links"><a href="https://github.com/Alike001/principal-cleanverse" target="_blank" rel="noreferrer">Source code <ExternalIcon size={15} /></a><a href="https://testnet.monadscan.com/address/0xc58d8746762cfB34066D2ADED4a4A6dD76D62719" target="_blank" rel="noreferrer">Factory on Monad <ExternalIcon size={15} /></a></div>
+        <div className="docs-links"><a href="https://github.com/Alike001/principal-cleanverse" target="_blank" rel="noreferrer">Source code <ExternalIcon size={15} /></a><a href="https://testnet.monadscan.com/address/0xcf145f0730989137cce3b94863490e6ac0f84c8b" target="_blank" rel="noreferrer">Factory on Monad <ExternalIcon size={15} /></a></div>
       </article>
     </section>
 

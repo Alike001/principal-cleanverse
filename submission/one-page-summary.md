@@ -12,15 +12,15 @@ Principal is a Monad contract-identity primitive. It binds one CVI-verified prin
 
 - CVI: the configured principal has a real active A-Pass on Monad.
 - CCP Validator: Principal’s deployed factory received `REGISTER_ROLE` through the encrypted Cleanverse `validator/grant` flow.
-- CVA: Principal's factory-created vault is registered as a Validator pool and has received the required CVI for Cleanverse Monad aUSDC through the documented CCP path.
+- CVA: Principal's factory-created vault is registered as a Validator pool, has its required CVI, received 0.05 aUSDC, and returned it through the Passport #1 permission check.
 
 ## Deployed chain and verified state
 
 - Chain: Monad testnet, chain ID 10143.
-- Factory: `0xc58d8746762cfB34066D2ADED4a4A6dD76D62719`.
-- Factory-created vault: `0xa92026e106562314667479786a914A1D81e09e9D`.
+- Factory: `0xcf145f0730989137cce3b94863490e6ac0f84c8b`.
+- Factory-created vault: `0x0355E4c81d0bD4212A1c0402E0438DCd7ED52837`.
 - Factory role: confirmed `REGISTER_ROLE` onchain.
-- Validator pool: registered on Monad. Vault CVI for aUSDC: registered on Monad. No CVA transfer, token balance, or successful passport issuance is claimed in this summary.
+- Validator pool: registered on Monad. Vault CVI for aUSDC: registered on Monad. Passport #1: issued with a 0.10 aUSDC cap. CVA proof: 0.05 aUSDC entered the vault and was returned through the permitted vault action. Final vault balance: zero.
 
 ## Why it matters
 
