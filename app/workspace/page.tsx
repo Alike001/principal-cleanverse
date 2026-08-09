@@ -5,7 +5,7 @@ export default function WorkspacePage() {
   return <main>
     <header className="workspace-site-header">
       <a className="site-brand" href="/"><Mark /><span>Principal</span></a>
-      <a className="workspace-back-link" href="/"><ArrowIcon size={16} />Back to product</a>
+      <div className="workspace-site-actions"><a className="workspace-controller-link" href="/controller">Controller tools <ArrowIcon size={14} /></a><a className="workspace-back-link" href="/"><ArrowIcon size={16} />Back to product</a></div>
     </header>
     <ContractPassport />
   </main>;

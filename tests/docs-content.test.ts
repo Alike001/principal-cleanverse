@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 const landing = readFileSync(new URL("../components/principal-landing.tsx", import.meta.url), "utf8");
 const docs = readFileSync(new URL("../app/docs/page.tsx", import.meta.url), "utf8");
 const workspace = readFileSync(new URL("../components/contract-passport.tsx", import.meta.url), "utf8");
+const workspaceRoute = readFileSync(new URL("../app/workspace/page.tsx", import.meta.url), "utf8");
+const controllerRoute = readFileSync(new URL("../app/controller/page.tsx", import.meta.url), "utf8");
 
 describe("public product navigation", () => {
   it("takes the landing Evidence link to the public evidence section", () => {
@@ -38,5 +40,14 @@ describe("public product navigation", () => {
   it("places the Principal mark beside the Contract Passport title", () => {
     expect(workspace).toContain('className="passport-product-title"');
     expect(workspace).toContain("<Mark size={32} /><h1>Principal</h1>");
+  });
+
+  it("keeps the workspace walletless and puts controller actions on their own route", () => {
+    expect(workspace).not.toContain("PassportIssuer");
+    expect(workspace).toContain('href="/controller"');
+    expect(workspaceRoute).toContain('href="/controller"');
+    expect(controllerRoute).toContain("<PassportIssuer />");
+    expect(controllerRoute).toContain("Owner-only controls");
+    expect(controllerRoute).toContain('href="/workspace"');
   });
 });

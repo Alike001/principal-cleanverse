@@ -126,3 +126,17 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 @media (max-width: 950px) { .issuer-section { grid-template-columns: 1fr; gap: 27px; margin-top: 48px; } }
 @media (max-width: 660px) { .issuer-section { margin-top: 42px; padding: 30px 0; }.issuer-card { padding: 19px; }.issuer-connection { align-items: flex-start; flex-direction: column; }.issuer-connection .secondary-action { width: 100%; }.issuer-fields { grid-template-columns: 1fr; } }
 @media (max-width: 660px) { .issuer-revoke form { align-items: stretch; flex-direction: column; }.revoke-validate { width: 100%; } }
+
+/* Proof-first workspace and isolated owner controls. */
+.workspace-heading-actions, .workspace-site-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 16px; }
+.workspace-heading-actions > span { display: inline-flex; align-items: center; gap: 8px; color: #475467; font-size: 12px; }
+.workspace-controller-link { display: inline-flex; align-items: center; gap: 6px; color: #155eef; font-size: 12px; font-weight: 680; text-decoration: none; }
+.workspace-controller-link:hover { color: #004eeb; text-decoration: underline; }
+.controller-shell { max-width: 1280px; margin: 0 auto; padding: 64px 32px 92px; }
+.controller-intro { max-width: 630px; }
+.controller-intro > p:first-child { margin: 0 0 10px; color: #b42318; font-size: 10px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+.controller-intro h1 { margin: 0; color: #101828; font-size: clamp(29px, 3vw, 40px); font-weight: 660; line-height: 1.07; letter-spacing: -.05em; }
+.controller-intro > p:nth-child(3) { max-width: 600px; margin: 18px 0 0; color: #475467; font-size: 14px; line-height: 1.6; }
+.controller-shell .issuer-section { margin-top: 47px; }
+@media (max-width: 950px) { .controller-shell { padding-left: 22px; padding-right: 22px; } }
+@media (max-width: 660px) { .workspace-site-actions { gap: 10px; }.workspace-back-link, .workspace-controller-link { font-size: 11px; }.controller-shell { padding: 46px 15px 60px; }.workspace-heading-actions { align-items: flex-start; flex-direction: column; gap: 10px; } }

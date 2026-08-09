@@ -5,7 +5,6 @@ import { principalDeployment } from "@/lib/principal/deployment";
 import { createPassportLink } from "@/lib/principal/passport-link";
 import { principalPassport, type EvidenceItem } from "@/lib/principal/passport";
 import { ArrowIcon, AssetIcon, BlockIcon, CheckIcon, CopyIcon, ExternalIcon, Mark, PersonIcon, RefreshIcon, VaultIcon } from "./icons";
-import { PassportIssuer } from "./passport-issuer";
 
 type LivePassport = {
   registry: string;
@@ -169,7 +168,7 @@ export function ContractPassport() {
 
   return (
     <section className="workspace-shell" id="workspace" aria-labelledby="workspace-surface-title">
-      <div className="workspace-heading"><div><p>Principal workspace</p><h2 id="workspace-surface-title">Contract Passport</h2></div><span><i />Monad testnet</span></div>
+      <div className="workspace-heading"><div><p>Principal workspace</p><h2 id="workspace-surface-title">Contract Passport</h2></div><div className="workspace-heading-actions"><span><i />Monad testnet</span><a className="workspace-controller-link" href="/controller">Vault controller tools <ArrowIcon size={14} /></a></div></div>
       <section className="workspace" aria-label="Principal contract passport">
         <article className="passport" id="passport">
           <div className="passport-header">
@@ -252,8 +251,6 @@ export function ContractPassport() {
           </div>
         </aside>
       </section>
-
-      <PassportIssuer />
 
       <section className="evidence-section" id="evidence" aria-labelledby="evidence-title">
         <div className="section-heading"><div><p>Evidence timeline</p><h2 id="evidence-title">Recorded testnet proof</h2></div><span>Historical snapshot · Aug 9, 2026</span></div>
