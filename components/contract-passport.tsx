@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { principalPassport, type EvidenceItem } from "@/lib/principal/passport";
-import { ArrowIcon, AssetIcon, BlockIcon, CheckIcon, CopyIcon, ExternalIcon, Mark, PersonIcon, RefreshIcon, VaultIcon } from "./icons";
+import { ArrowIcon, AssetIcon, BlockIcon, CheckIcon, CopyIcon, ExternalIcon, PersonIcon, RefreshIcon, VaultIcon } from "./icons";
 
 function StateIcon({ state }: { state: EvidenceItem["state"] | "blocked" | "verified" }) {
   return state === "verified" ? <CheckIcon size={16} /> : <BlockIcon size={16} />;
@@ -58,16 +58,8 @@ export function ContractPassport() {
   const recipientState = recipient.trim() ? "Recipient format will be checked before any transfer" : "Add a recipient to prepare a future preflight";
 
   return (
-    <main className="app-shell">
-      <header className="topbar">
-        <a className="brand" href="#passport" aria-label="Principal home"><Mark /><span>Principal</span></a>
-        <div className="topbar-right">
-          <span className="network"><i />Monad testnet</span>
-          <span className="principal-hint">Active CVI principal</span>
-          <a className="docs-link" href="https://docs.cleanverse.com" target="_blank" rel="noreferrer">Docs <ExternalIcon size={14} /></a>
-        </div>
-      </header>
-
+    <section className="workspace-shell" id="workspace" aria-labelledby="workspace-surface-title">
+      <div className="workspace-heading"><div><p>Principal workspace</p><h2 id="workspace-surface-title">Contract Passport</h2></div><span><i />Monad testnet</span></div>
       <section className="workspace" aria-label="Principal contract passport">
         <article className="passport" id="passport">
           <div className="passport-header">
@@ -134,7 +126,7 @@ export function ContractPassport() {
         </aside>
       </section>
 
-      <section className="evidence-section" aria-labelledby="evidence-title">
+      <section className="evidence-section" id="evidence" aria-labelledby="evidence-title">
         <div className="section-heading"><div><p>Evidence timeline</p><h2 id="evidence-title">What Principal has proved</h2></div><span>Verified snapshot · Aug 9, 2026</span></div>
         <ol className="timeline">
           {principalPassport.evidence.map((item) => <li key={item.title} className={item.state}>
@@ -143,6 +135,6 @@ export function ContractPassport() {
           </li>)}
         </ol>
       </section>
-    </main>
+    </section>
   );
 }
