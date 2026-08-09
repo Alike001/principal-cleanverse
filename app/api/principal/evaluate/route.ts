@@ -20,12 +20,23 @@ export async function POST(request: Request) {
 
   const recipient = (body as { recipient?: unknown }).recipient;
   const amount = (body as { amount?: unknown }).amount;
+  const registry = (body as { registry?: unknown }).registry;
+  const passportId = (body as { passportId?: unknown }).passportId;
   if (typeof recipient !== "string" || typeof amount !== "string") {
     return Response.json({ error: "Recipient and amount must be strings." }, { status: 400 });
   }
+  if (registry !== undefined && typeof registry !== "string") {
+    return Response.json({ error: "Registry must be a string." }, { status: 400 });
+  }
+  if (passportId !== undefined && typeof passportId !== "string") {
+    return Response.json({ error: "Passport ID must be a string." }, { status: 400 });
+  }
 
   try {
-    return Response.json(await evaluatePrincipalPassport(recipient.trim(), amount.trim()));
+    return Response.json(await evaluatePrincipalPassport(recipient.trim(), amount.trim(), {
+      registry: registry?.trim(),
+      passportId: passportId?.trim(),
+    }));
   } catch (error) {
     if (error instanceof PrincipalInputError) {
       return Response.json({ error: error.message }, { status: 400 });

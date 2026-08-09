@@ -21,7 +21,8 @@ describe("public product navigation", () => {
     expect(landing).not.toContain("0x2683f26DDc6c2aF920Ee844150000a59FBBd4291");
     expect(landing).toContain("PERMITTED · 0.05 aUSDC");
     expect(workspace).toContain("Check authority");
-    expect(workspace).toContain("Validator pool <small>recorded proof");
+    expect(workspace).toContain("Load Passport");
+    expect(workspace).toContain("Principal registry");
     expect(workspace).not.toContain("CCP_POOL_NOT_REGISTERED");
     expect(workspace).not.toContain("Transfer unavailable");
     expect(workspace).not.toContain("Pool not registered");
@@ -29,8 +30,8 @@ describe("public product navigation", () => {
 
   it("keeps recorded proof separate from the live preflight", () => {
     expect(workspace).toContain("status-historical");
-    expect(workspace).toContain("active Passport #2");
-    expect(workspace).toContain("The live preflight is the source of truth");
+    expect(workspace).toContain("Load another passport to replace this reviewed snapshot");
+    expect(workspace).toContain("The preflight reloads it before every decision");
     expect(workspace).toContain("Historical snapshot · Aug 9, 2026");
   });
 

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { principalDeployment } from "./deployment";
+import { loadPassport, PrincipalPassportInputError, PrincipalPassportRpcError } from "./passport.server";
 
 const EVALUATE_SELECTOR = "7e8e89cb";
 const ADDRESS_PATTERN = /^0x[0-9a-fA-F]{40}$/;
@@ -56,17 +57,25 @@ export function parseAssetAmount(value: string) {
   return units;
 }
 
-export function encodeEvaluateCall(recipient: string, amountUnits: bigint) {
+export function encodeEvaluateCall(vault: string, recipient: string, amountUnits: bigint, passportId = String(principalDeployment.passportId)) {
+  if (!ADDRESS_PATTERN.test(vault)) {
+    throw new PrincipalInputError("Vault must be a valid EVM address.");
+  }
   if (!ADDRESS_PATTERN.test(recipient)) {
     throw new PrincipalInputError("Recipient must be a valid EVM address.");
   }
+  if (!/^[1-9]\d*$/.test(passportId)) {
+    throw new PrincipalInputError("Passport ID must be a positive whole number.");
+  }
 
-  return `0x${EVALUATE_SELECTOR}${encodeWord(BigInt(principalDeployment.passportId))}${encodeAddress(principalDeployment.vaultAddress)}${encodeAddress(recipient)}${encodeWord(amountUnits)}`;
+  return `0x${EVALUATE_SELECTOR}${encodeWord(BigInt(passportId))}${encodeAddress(vault)}${encodeAddress(recipient)}${encodeWord(amountUnits)}`;
 }
 
 export type PrincipalEvaluation = {
   chain: typeof principalDeployment.chainName;
-  passportId: number;
+  registry: string;
+  passportId: string;
+  vault: string;
   recipient: string;
   amount: string;
   amountUnits: string;
@@ -75,14 +84,30 @@ export type PrincipalEvaluation = {
   source: "live_eth_call";
 };
 
+type EvaluationTarget = {
+  registry?: string;
+  passportId?: string;
+};
+
 export async function evaluatePrincipalPassport(
   recipient: string,
   amount: string,
+  target: EvaluationTarget = {},
   fetcher: FetchLike = fetch,
   rpcUrl = process.env.MONAD_RPC_URL?.trim() || principalDeployment.rpcUrl,
 ): Promise<PrincipalEvaluation> {
   const amountUnits = parseAssetAmount(amount);
-  const data = encodeEvaluateCall(recipient, amountUnits);
+  const registry = target.registry || principalDeployment.factoryAddress;
+  const passportId = target.passportId || String(principalDeployment.passportId);
+  let passport;
+  try {
+    passport = await loadPassport(registry, passportId, fetcher, rpcUrl);
+  } catch (error) {
+    if (error instanceof PrincipalPassportInputError) throw new PrincipalInputError(error.message);
+    if (error instanceof PrincipalPassportRpcError) throw new PrincipalRpcError(error.message);
+    throw error;
+  }
+  const data = encodeEvaluateCall(passport.vault, recipient, amountUnits, passport.passportId);
 
   const rpcUrls = [...new Set([rpcUrl, principalDeployment.rpcUrl])];
   let result: unknown;
@@ -96,7 +121,7 @@ export async function evaluatePrincipalPassport(
           jsonrpc: "2.0",
           id: 1,
           method: "eth_call",
-          params: [{ to: principalDeployment.factoryAddress, data }, "latest"],
+          params: [{ to: passport.registry, data }, "latest"],
         }),
         cache: "no-store",
         signal: AbortSignal.timeout(10_000),
@@ -124,7 +149,9 @@ export async function evaluatePrincipalPassport(
 
   return {
     chain: principalDeployment.chainName,
-    passportId: principalDeployment.passportId,
+    registry: passport.registry,
+    passportId: passport.passportId,
+    vault: passport.vault,
     recipient,
     amount,
     amountUnits: amountUnits.toString(),

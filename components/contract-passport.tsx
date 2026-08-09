@@ -1,11 +1,43 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { principalDeployment } from "@/lib/principal/deployment";
 import { principalPassport, type EvidenceItem } from "@/lib/principal/passport";
 import { ArrowIcon, AssetIcon, BlockIcon, CheckIcon, CopyIcon, ExternalIcon, Mark, PersonIcon, RefreshIcon, VaultIcon } from "./icons";
 
+type LivePassport = {
+  registry: string;
+  passportId: string;
+  principal: string;
+  vault: string;
+  runtimeCodeHash: string;
+  asset: string;
+  amountCap: string;
+  expiry: string;
+  nonce: string;
+  chainId: string;
+  active: boolean;
+};
+
 function StateIcon({ state }: { state: EvidenceItem["state"] | "blocked" | "verified" }) {
   return state === "verified" ? <CheckIcon size={16} /> : <BlockIcon size={16} />;
+}
+
+function shorten(value: string, head = 6, tail = 4) {
+  return value.length > head + tail + 1 ? `${value.slice(0, head)}…${value.slice(-tail)}` : value;
+}
+
+function formatUnits(value: string) {
+  const units = BigInt(value);
+  const whole = units / 1_000_000n;
+  const fraction = (units % 1_000_000n).toString().padStart(6, "0").replace(/0+$/, "");
+  return `${whole}${fraction ? `.${fraction}` : ""} aUSDC per transfer`;
+}
+
+function formatExpiry(value: string) {
+  const timestamp = BigInt(value);
+  if (timestamp > BigInt(Number.MAX_SAFE_INTEGER / 1000)) return "Unrepresentable timestamp";
+  return new Date(Number(timestamp) * 1000).toISOString().replace("T", " ").replace(".000Z", " UTC");
 }
 
 function CopyValue({ value, display, label }: { value: string; display: string; label: string }) {
@@ -23,50 +55,70 @@ function PassportField({ label, children, tone }: { label: string; children: Rea
 }
 
 export function ContractPassport() {
+  const [registry, setRegistry] = useState<string>(principalDeployment.factoryAddress);
+  const [passportId, setPassportId] = useState<string>(String(principalDeployment.passportId));
   const [recipient, setRecipient] = useState(principalPassport.vaultAddress);
   const [amount, setAmount] = useState("0.05");
   const [expanded, setExpanded] = useState(false);
-  const [cviState, setCviState] = useState<"snapshot" | "registered" | "unavailable">("snapshot");
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshMessage, setRefreshMessage] = useState("Historical CVI proof is shown. Refresh to check the optional Cleanverse route.");
+  const [livePassport, setLivePassport] = useState<LivePassport | null>(null);
+  const [loadState, setLoadState] = useState<{ state: "idle" | "loading" | "error"; message: string }>({
+    state: "idle",
+    message: "Load any deployed Principal registry and passport ID from Monad.",
+  });
   const [preflight, setPreflight] = useState<{
     state: "idle" | "checking" | "complete" | "error";
     decision?: string;
     permitted?: boolean;
     message: string;
-  }>({ state: "idle", message: "Enter a recipient and amount to query the active Passport #2 on Monad." });
+  }>({ state: "idle", message: "Enter a recipient and amount to query the selected Passport on Monad." });
 
-  async function refreshStatus() {
-    setIsRefreshing(true);
+  const isHistoricalDefault = !livePassport;
+  const passport = livePassport;
+  const displayRegistry = passport?.registry || principalPassport.registryAddress;
+  const displayVault = passport?.vault || principalPassport.vaultAddress;
+  const displayPassportId = passport?.passportId || String(principalDeployment.passportId);
+  const recipientState = recipient.trim() ? "Recipient ready for a read-only check" : "Add a recipient to run the preflight";
+  const resultTone = preflight.state === "complete" && preflight.permitted
+    ? "result-verified"
+    : preflight.state === "idle" || preflight.state === "checking"
+      ? "result-neutral"
+      : "result-blocked";
+
+  async function loadPassport(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoadState({ state: "loading", message: "Reading the Passport tuple from Monad." });
+    setPreflight({ state: "idle", message: "Load complete. Enter a recipient and amount to run a live check." });
     try {
-      const response = await fetch("/api/cleanverse/monad", { cache: "no-store" });
-      if (!response.ok) throw new Error("unavailable");
-      const data: { principalCvi?: "registered" | "not_registered" } = await response.json();
-      if (data.principalCvi === "registered") {
-        setCviState("registered");
-        setRefreshMessage("Live Cleanverse CVI check confirmed");
-      } else {
-        setCviState("unavailable");
-        setRefreshMessage("Live CVI check did not confirm an active principal");
+      const response = await fetch("/api/principal/passport", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ registry, passportId }),
+      });
+      const data: LivePassport & { error?: string } = await response.json();
+      if (!response.ok || !data.vault || !data.passportId) {
+        setLoadState({ state: "error", message: data.error || "Passport lookup is unavailable." });
+        return;
       }
+      setLivePassport(data);
+      setRegistry(data.registry);
+      setPassportId(data.passportId);
+      setRecipient(data.vault);
+      setLoadState({ state: "idle", message: data.principal === "0x0000000000000000000000000000000000000000" ? "No Passport exists at this ID." : "Live Passport loaded from Monad." });
     } catch {
-      setCviState("unavailable");
-      setRefreshMessage("Live status is unavailable. The snapshot does not grant authority.");
-    } finally {
-      setIsRefreshing(false);
+      setLoadState({ state: "error", message: "Passport lookup is unavailable. No authority is assumed." });
     }
   }
 
   async function runPreflight(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPreflight({ state: "checking", message: "Querying the deployed Principal contract through eth_call." });
+    setPreflight({ state: "checking", message: "Loading the Passport and querying the deployed Principal contract through eth_call." });
     try {
       const response = await fetch("/api/principal/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipient, amount }),
+        body: JSON.stringify({ registry, passportId, recipient, amount }),
       });
-      const data: { error?: string; decision?: string; permitted?: boolean } = await response.json();
+      const data: { error?: string; decision?: string; permitted?: boolean; vault?: string } = await response.json();
       if (!response.ok || !data.decision) {
         setPreflight({ state: "error", message: data.error || "Live preflight is unavailable." });
         return;
@@ -84,13 +136,6 @@ export function ContractPassport() {
     }
   }
 
-  const recipientState = recipient.trim() ? "Recipient ready for a read-only check" : "Add a recipient to run the preflight";
-  const resultTone = preflight.state === "complete" && preflight.permitted
-    ? "result-verified"
-    : preflight.state === "idle" || preflight.state === "checking"
-      ? "result-neutral"
-      : "result-blocked";
-
   return (
     <section className="workspace-shell" id="workspace" aria-labelledby="workspace-surface-title">
       <div className="workspace-heading"><div><p>Principal workspace</p><h2 id="workspace-surface-title">Contract Passport</h2></div><span><i />Monad testnet</span></div>
@@ -100,42 +145,52 @@ export function ContractPassport() {
             <div>
               <p className="passport-kicker">Contract passport</p>
               <div className="passport-product-title"><Mark size={32} /><h1>Principal</h1></div>
-              <p className="passport-subtitle">Revocable authority for a verified asset contract.</p>
+              <p className="passport-subtitle">Inspect the authority bound to any deployed Principal passport.</p>
             </div>
             <div className="passport-header-meta">
-              <span className="passport-id">Passport: {principalPassport.passportId}</span>
-              <div className="status status-historical"><CheckIcon size={16} />{principalPassport.state}</div>
+              <span className="passport-id">Passport: #{displayPassportId}</span>
+              <div className={`status ${isHistoricalDefault ? "status-historical" : passport?.active ? "status-verified" : ""}`}><CheckIcon size={16} />{isHistoricalDefault ? principalPassport.state : passport?.active ? "Live active passport" : "Live inactive passport"}</div>
             </div>
           </div>
 
-          <p className="status-explanation status-explanation-historical">{principalPassport.statusDetail} The live preflight is the source of truth for a current permit or block.</p>
+          <p className={`status-explanation ${isHistoricalDefault ? "status-explanation-historical" : passport?.active ? "status-explanation-verified" : ""}`}>
+            {isHistoricalDefault ? `${principalPassport.statusDetail} Load another passport to replace this reviewed snapshot with a fresh Monad read.` : "This Passport tuple was loaded directly from Monad. The preflight reloads it before every decision."}
+          </p>
 
           <dl className="passport-grid">
-            <PassportField label="Verified principal" tone={cviState === "registered" ? "blue" : "muted"}><span className="inline-icon"><PersonIcon size={16} />{cviState === "unavailable" ? "CVI state unavailable" : principalPassport.principal}</span></PassportField>
-            <PassportField label="Vault"><CopyValue label="vault address" display={principalPassport.vault} value={principalPassport.vaultAddress} /></PassportField>
-            <PassportField label="Factory"><CopyValue label="factory address" display={principalPassport.registry} value={principalPassport.registryAddress} /></PassportField>
-            <PassportField label="Runtime code hash"><span className="muted-value">{principalPassport.codeHash}</span></PassportField>
-            <PassportField label="CVA"><span className="inline-icon"><AssetIcon size={16} />{principalPassport.asset}</span></PassportField>
-            <PassportField label="Permitted action"><span>{principalPassport.authority}</span></PassportField>
-            <PassportField label="Per-transfer cap"><span className="mono">{principalPassport.cap}</span></PassportField>
-            <PassportField label="Expiry"><span>{principalPassport.expiry}</span></PassportField>
-            <PassportField label="Nonce"><span className="mono">{principalPassport.nonce}</span></PassportField>
+            <PassportField label="Verified principal" tone="muted"><span className="inline-icon"><PersonIcon size={16} />{passport ? shorten(passport.principal) : principalPassport.principal}</span></PassportField>
+            <PassportField label="Vault"><CopyValue label="vault address" display={shorten(displayVault)} value={displayVault} /></PassportField>
+            <PassportField label="Factory"><CopyValue label="factory address" display={shorten(displayRegistry)} value={displayRegistry} /></PassportField>
+            <PassportField label="Runtime code hash"><span className="muted-value">{passport ? shorten(passport.runtimeCodeHash, 8, 6) : principalPassport.codeHash}</span></PassportField>
+            <PassportField label="CVA"><span className="inline-icon"><AssetIcon size={16} />{passport ? shorten(passport.asset) : principalPassport.asset}</span></PassportField>
+            <PassportField label="Permitted action"><span>{passport ? "CVA transfer calls, per-call capped" : principalPassport.authority}</span></PassportField>
+            <PassportField label="Per-transfer cap"><span className="mono">{passport ? formatUnits(passport.amountCap) : principalPassport.cap}</span></PassportField>
+            <PassportField label="Expiry"><span>{passport ? formatExpiry(passport.expiry) : principalPassport.expiry}</span></PassportField>
+            <PassportField label="Nonce"><span className="mono">{passport?.nonce || principalPassport.nonce}</span></PassportField>
           </dl>
 
           <div className="relationship" aria-label="Authority relationship">
-            <div className={`relationship-node ${cviState === "registered" ? "is-verified" : "is-historical"}`}><PersonIcon size={19} /><span><strong>Verified principal</strong><small>{cviState === "registered" ? "CVI active" : cviState === "snapshot" ? "Recorded proof" : "Read unavailable"}</small></span></div>
+            <div className="relationship-node is-historical"><PersonIcon size={19} /><span><strong>Verified principal</strong><small>{passport ? "Live Passport tuple" : "Recorded proof"}</small></span></div>
             <ArrowIcon className="relationship-arrow" size={20} />
-            <div className="relationship-node is-verified"><VaultIcon size={19} /><span><strong>PrincipalVault</strong><small>Deployed</small></span></div>
+            <div className="relationship-node is-verified"><VaultIcon size={19} /><span><strong>PrincipalVault</strong><small>{passport ? "Bound by Passport" : "Deployed"}</small></span></div>
             <ArrowIcon className="relationship-arrow" size={20} />
-            <div className="relationship-node is-verified"><AssetIcon size={19} /><span><strong>CVA transfer</strong><small>0.05 aUSDC proven</small></span></div>
+            <div className="relationship-node is-verified"><AssetIcon size={19} /><span><strong>CVA transfer</strong><small>{passport ? "Preflighted live" : "0.05 aUSDC proven"}</small></span></div>
           </div>
 
-          <div className="passport-footer"><span>Chain: {principalPassport.chain}</span><button type="button" className="text-button" onClick={() => setExpanded(!expanded)}>{expanded ? "Hide evidence details" : "Show evidence details"}</button></div>
-          {expanded && <div className="passport-details"><p>The recorded evidence shows that the factory created this vault, held the Cleanverse registrar role, registered the vault's RuleV2 pool and CVI, and issued Passport #1. Passport #2 renewed the same mandate. The live preflight checks the deployed contract. The amount cap applies to each transfer call until the passport expires or is revoked.</p></div>}
+          <div className="passport-footer"><span>Chain: Monad testnet</span><button type="button" className="text-button" onClick={() => setExpanded(!expanded)}>{expanded ? "Hide evidence details" : "Show evidence details"}</button></div>
+          {expanded && <div className="passport-details"><p>The recorded evidence shows that the factory created this vault, held the Cleanverse registrar role, registered the vault's RuleV2 pool and CVI, and issued Passport #1. A loaded Passport is read directly from its registry. The preflight then re-reads that tuple before evaluating current authority.</p></div>}
         </article>
 
-        <aside className="action-panel" aria-label="Transfer preflight">
+        <aside className="action-panel" aria-label="Passport inspector">
           <div className="action-heading"><p>Authority inspector</p><h2>Live preflight</h2><span>Read-only Monad eth_call, no wallet required</span></div>
+          <form className="passport-locator" onSubmit={loadPassport}>
+            <label htmlFor="registry">Principal registry</label>
+            <input id="registry" value={registry} onChange={(event) => setRegistry(event.target.value)} placeholder="0x… registry address" autoComplete="off" />
+            <label htmlFor="passport-id">Passport ID</label>
+            <input id="passport-id" inputMode="numeric" value={passportId} onChange={(event) => setPassportId(event.target.value)} placeholder="1" autoComplete="off" />
+            <button className="secondary-action" type="submit" disabled={loadState.state === "loading"}>{loadState.state === "loading" ? "Loading Passport" : "Load Passport"}</button>
+            <p className={`inspector-message ${loadState.state}`} aria-live="polite">{loadState.message}</p>
+          </form>
           <form onSubmit={runPreflight}>
             <label htmlFor="recipient">Recipient</label>
             <input id="recipient" value={recipient} onChange={(event) => setRecipient(event.target.value)} placeholder="0x… recipient address" autoComplete="off" />
@@ -145,16 +200,14 @@ export function ContractPassport() {
           </form>
 
           <section className="preflight-summary" aria-labelledby="preflight-title">
-            <div className="preflight-title"><h3 id="preflight-title">Deterministic preflight</h3><button type="button" className="icon-button" onClick={refreshStatus} disabled={isRefreshing} aria-label="Refresh Cleanverse CVI state"><RefreshIcon size={16} /></button></div>
+            <div className="preflight-title"><h3 id="preflight-title">Deterministic preflight</h3><RefreshIcon size={16} /></div>
             <ul>
-              <li className={cviState === "registered" ? "verified" : cviState === "snapshot" ? "historical" : "blocked"}><StateIcon state={cviState === "unavailable" ? "blocked" : "verified"} /><span>Principal CVI <small>{cviState === "registered" ? "live confirmed" : cviState === "snapshot" ? "recorded proof" : "not confirmed"}</small></span></li>
-              <li className="historical"><CheckIcon size={16} /><span>Factory vault <small>recorded proof</small></span></li>
-              <li className="historical"><CheckIcon size={16} /><span>Registrar role <small>recorded proof</small></span></li>
-              <li className="historical"><CheckIcon size={16} /><span>Validator pool <small>recorded proof</small></span></li>
-              <li className="historical"><CheckIcon size={16} /><span>Per-transfer cap <small>{principalPassport.cap}</small></span></li>
+              <li className="verified"><CheckIcon size={16} /><span>Registry source <small>Monad contract read</small></span></li>
+              <li className={passport ? "verified" : "historical"}><StateIcon state="verified" /><span>Passport tuple <small>{passport ? "loaded live" : "reviewed default"}</small></span></li>
+              <li className={passport ? "verified" : "historical"}><StateIcon state="verified" /><span>Vault binding <small>{passport ? shorten(displayVault) : "recorded proof"}</small></span></li>
+              <li className="historical"><CheckIcon size={16} /><span>Cleanverse lifecycle <small>public evidence below</small></span></li>
               <li className="muted"><span className="dot" /><span>{recipientState}</span></li>
             </ul>
-            <p className="refresh-message" aria-live="polite">{isRefreshing ? "Refreshing Cleanverse status…" : refreshMessage}</p>
           </section>
 
           <div className={`result-block ${resultTone}`}>

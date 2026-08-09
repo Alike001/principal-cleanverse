@@ -1,6 +1,6 @@
 # Principal
 
-Principal makes the controller of a smart contract explicit before it can move a Cleanverse Verified Asset. It binds one verified CVI principal, one immutable vault, one aUSDC action, a per-transfer cap, expiry, and a deterministic onchain decision.
+Principal makes the controller of a smart contract explicit before it can move a Cleanverse Verified Asset. Its public inspector reads any deployed Principal registry and passport ID on Monad, then reruns the deterministic authority decision against the vault bound by that passport.
 
 Live demo: [cleanverse-two.vercel.app](https://cleanverse-two.vercel.app)
 
@@ -25,7 +25,7 @@ pnpm install
 pnpm dev
 ```
 
-Open `http://localhost:3000`. The landing page, workspace, evidence links, and live read-only passport check work without a wallet, private key, or Cleanverse credentials. The check calls the deployed registry with Monad `eth_call`, so it never signs or broadcasts a transaction.
+Open `http://localhost:3000`. The landing page, workspace, evidence links, and live read-only passport check work without a wallet, private key, or Cleanverse credentials. Enter a Principal registry address and passport ID to load the current onchain tuple, then check a recipient and amount. The server reloads the passport before each decision and calls Monad with `eth_call`, so it never signs or broadcasts a transaction.
 
 Copy `.env.example` to `.env.local` only if you need the optional server-side Cleanverse CVI refresh. That route requires `CLEANVERSE_API_ID`, `CLEANVERSE_API_KEY`, and `DEMO_PRINCIPAL_ADDRESS`. Keep those values on the server. The live passport evaluator does not need Cleanverse credentials.
 
@@ -46,7 +46,7 @@ The contract suite covers factory provenance, one-vault creation, principal elig
 
 ## Architecture
 
-Onchain state holds factory provenance, vault ownership, code binding, the passport mandate, and transfer enforcement. Cleanverse CVI and CVA remain the source of identity and asset eligibility. Server-only code calls the Cleanverse API. The browser receives only safe status summaries and reviewed public evidence.
+Onchain state holds factory provenance, vault ownership, code binding, the passport mandate, and transfer enforcement. Cleanverse CVI and CVA remain the source of identity and asset eligibility. Server-only code reads Monad and calls the optional Cleanverse API. The browser receives only validated onchain Passport data, safe status summaries, and reviewed public evidence.
 
 Passport #2 allows up to `0.10 aUSDC` in each transfer call until Aug. 16, 2026 at 17:04 UTC or until it is revoked. It is not a cumulative spending budget. Passport #1 remains the public receipt for the completed 0.05 aUSDC transfer proof.
 
