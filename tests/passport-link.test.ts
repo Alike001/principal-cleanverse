@@ -3,8 +3,8 @@ import { createPassportLink } from "../lib/principal/passport-link";
 
 describe("Passport inspection link", () => {
   it("creates a portable workspace link for one exact registry and Passport", () => {
-    expect(createPassportLink("https://principal.vercel.app", "0xab048434357b70ec7b7773ea3ef595a774cb7b5b", "1"))
-      .toBe("https://principal.vercel.app/workspace?registry=0xab048434357b70ec7b7773ea3ef595a774cb7b5b&passport=1");
+    expect(createPassportLink("https://principal-cleanverse.vercel.app", "0xab048434357b70ec7b7773ea3ef595a774cb7b5b", "1"))
+      .toBe("https://principal-cleanverse.vercel.app/workspace?registry=0xab048434357b70ec7b7773ea3ef595a774cb7b5b&passport=1");
   });
 
   it("rejects malformed targets rather than creating ambiguous links", () => {

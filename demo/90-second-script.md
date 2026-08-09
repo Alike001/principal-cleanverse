@@ -1,6 +1,6 @@
 # Principal 90-Second Judging Demo
 
-Use the public deployment at https://principal.vercel.app. Every core claim below is either rerun live or linked to a public Monad receipt. The demo does not broadcast a transaction or mutate CVI state.
+Use the public deployment at https://principal-cleanverse.vercel.app. Every core claim below is either rerun live or linked to a public Monad receipt. The demo does not broadcast a transaction or mutate CVI state.
 
 ## Criterion-led script
 

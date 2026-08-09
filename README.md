@@ -2,7 +2,7 @@
 
 Principal makes the controller of a smart contract explicit before it can move a Cleanverse Verified Asset. Its public inspector reads any deployed Principal registry and passport ID on Monad, then reruns the deterministic authority decision against the vault bound by that passport.
 
-Live demo: [principal.vercel.app](https://principal.vercel.app)
+Live demo: [principal-cleanverse.vercel.app](https://principal-cleanverse.vercel.app)
 
 ## Live Monad testnet proof
 
