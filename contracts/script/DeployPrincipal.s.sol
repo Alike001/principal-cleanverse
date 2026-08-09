@@ -6,15 +6,14 @@ import {Script} from "forge-std/Script.sol";
 import {CleanverseMonad} from "../src/CleanverseMonad.sol";
 import {IAPassComplianceValidator} from "../src/interfaces/IAPassComplianceValidator.sol";
 import {PrincipalRegistry} from "../src/PrincipalRegistry.sol";
-import {PrincipalVault} from "../src/PrincipalVault.sol";
 
-/// @notice Deploys the only Principal registry and vault for the approved Monad proof.
+/// @notice Deploys the role-holding Principal factory before Cleanverse grants REGISTER_ROLE.
 contract DeployPrincipal is Script {
     error WrongChain(uint256 actual, uint256 expected);
 
-    event PrincipalDeployed(address indexed registry, address indexed vault, address indexed principal);
+    event PrincipalFactoryDeployed(address indexed registry, address indexed principal);
 
-    function run() external returns (PrincipalRegistry registry, PrincipalVault vault) {
+    function run() external returns (PrincipalRegistry registry) {
         if (block.chainid != CleanverseMonad.CHAIN_ID) {
             revert WrongChain(block.chainid, CleanverseMonad.CHAIN_ID);
         }
@@ -27,9 +26,8 @@ contract DeployPrincipal is Script {
             CleanverseMonad.AUSDC,
             CleanverseMonad.CHAIN_ID
         );
-        vault = new PrincipalVault(principal, registry, CleanverseMonad.AUSDC);
         vm.stopBroadcast();
 
-        emit PrincipalDeployed(address(registry), address(vault), principal);
+        emit PrincipalFactoryDeployed(address(registry), principal);
     }
 }

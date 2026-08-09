@@ -14,6 +14,8 @@ import type {
   DepositATokenList,
   GenerateAPassRequest,
   GenerateAPassResponse,
+  ValidatorGrantRequest,
+  ValidatorGrantResponse,
 } from "./types";
 
 type FetchLike = typeof fetch;
@@ -46,6 +48,10 @@ export class CleanverseClient {
 
   async generateAPass(payload: GenerateAPassRequest): Promise<GenerateAPassResponse> {
     return this.request<GenerateAPassResponse>("/generate_apass", payload, true);
+  }
+
+  async grantValidatorRegistrar(payload: ValidatorGrantRequest): Promise<ValidatorGrantResponse> {
+    return this.request<ValidatorGrantResponse>("/validator/grant", payload, true);
   }
 
   private async request<T>(path: string, body: unknown, encrypted = false): Promise<T> {

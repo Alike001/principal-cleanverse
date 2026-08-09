@@ -11,7 +11,6 @@ import {MockCVA} from "./mocks/MockCVA.sol";
 import {MockValidator} from "./mocks/MockValidator.sol";
 
 contract PrincipalRegistryTest is Test {
-    address internal constant ADMIN = address(0xA11CE);
     address internal constant PRINCIPAL = address(0xB0B);
     address internal constant RECIPIENT = address(0xCAFE);
     address internal constant OTHER = address(0xD00D);
@@ -26,13 +25,14 @@ contract PrincipalRegistryTest is Test {
     function setUp() external {
         validator = new MockValidator();
         token = new MockCVA();
-        registry = new PrincipalRegistry(ADMIN, validator, address(token), block.chainid);
-        vault = new PrincipalVault(PRINCIPAL, registry, address(token));
+        registry = new PrincipalRegistry(PRINCIPAL, validator, address(token), block.chainid);
+        vm.prank(PRINCIPAL);
+        vault = registry.createVault();
         token.mint(address(vault), 1_000e6);
 
-        vm.prank(ADMIN);
+        vm.prank(PRINCIPAL);
         registry.registerCleanversePoolRule(address(vault), _rule());
-        vm.prank(ADMIN);
+        vm.prank(PRINCIPAL);
         registry.registerVaultCvi(address(vault));
         validator.setEligible(address(vault), PRINCIPAL, true);
         validator.setEligible(address(token), RECIPIENT, true);
@@ -49,6 +49,29 @@ contract PrincipalRegistryTest is Test {
         assertEq(passport.amountCap, CAP);
         assertEq(passport.nonce, 0);
         assertTrue(passport.active);
+    }
+
+    function test_factoryCreatesTheOnlyVaultAndInitiatesValidatorRegistration() external {
+        assertEq(registry.factoryVault(), address(vault));
+        assertEq(vault.owner(), PRINCIPAL);
+        assertEq(address(vault.registry()), address(registry));
+        assertEq(vault.asset(), address(token));
+        assertEq(validator.lastRegisterV2Caller(), address(registry));
+    }
+
+    function test_factoryCannotCreateOrRegisterAnotherVault() external {
+        vm.prank(PRINCIPAL);
+        vm.expectRevert(abi.encodeWithSelector(PrincipalRegistry.VaultAlreadyCreated.selector, address(vault)));
+        registry.createVault();
+
+        PrincipalVault externalVault = new PrincipalVault(PRINCIPAL, registry, address(token));
+        vm.prank(PRINCIPAL);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                PrincipalRegistry.UnexpectedFactoryVault.selector, address(externalVault), address(vault)
+            )
+        );
+        registry.registerCleanversePoolRule(address(externalVault), _rule());
     }
 
     function test_permittedTransferMovesOnlyTheAuthorizedAmount() external {

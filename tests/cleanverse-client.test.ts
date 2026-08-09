@@ -89,6 +89,26 @@ describe("CleanverseClient", () => {
     expect(wirePayload).not.toHaveProperty("apiKey");
   });
 
+  it("encrypts Validator registrar grants and keeps the signature out of the URL", async () => {
+    const fetcher = vi.fn().mockResolvedValue(
+      jsonResponse({ code: "0000", message: "success", data: { chain: "monad", address: "0xfactory", tx_hash: "0xtx" } }),
+    );
+    const client = new CleanverseClient(config, fetcher);
+    const signature = `0x${"a".repeat(130)}` as `0x${string}`;
+
+    await client.grantValidatorRegistrar({
+      chain: "monad",
+      address: "0x0000000000000000000000000000000000000001",
+      owner_signature: signature,
+    });
+
+    const [url, request] = fetcher.mock.calls[0] as [string, RequestInit];
+    const wirePayload = JSON.parse(String(request.body));
+    expect(url).toBe("https://uatapi.cleanverse.com/api/cooperate/validator/grant");
+    expect(url).not.toContain(signature);
+    expect(wirePayload.data).not.toContain(signature);
+  });
+
   it("reports a missing A-Pass without exposing a principal wallet to the browser status model", async () => {
     const status = await getMonadPrincipalStatus(
       {

@@ -73,3 +73,15 @@ export type GenerateAPassResponse = {
     depositUSDTWallet: string;
   };
 };
+
+export type ValidatorGrantRequest = {
+  chain: "monad";
+  address: `0x${string}`;
+  owner_signature: `0x${string}`;
+};
+
+export type ValidatorGrantResponse = {
+  chain: string;
+  address: string;
+  tx_hash: string;
+};

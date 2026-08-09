@@ -7,6 +7,7 @@ contract MockValidator is IAPassComplianceValidator {
     mapping(address pool => bool) public registered;
     mapping(address pool => mapping(address user => bool)) public eligible;
     bool public shouldRevert;
+    address public lastRegisterV2Caller;
 
     function setEligible(address pool, address user, bool value) external {
         eligible[pool][user] = value;
@@ -17,6 +18,7 @@ contract MockValidator is IAPassComplianceValidator {
     }
 
     function registerV2(address poolAddress, RuleV2 calldata) external {
+        lastRegisterV2Caller = msg.sender;
         registered[poolAddress] = true;
     }
 

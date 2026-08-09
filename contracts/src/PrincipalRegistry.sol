@@ -6,6 +6,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IAPassComplianceValidator} from "./interfaces/IAPassComplianceValidator.sol";
 import {IPrincipalRegistry} from "./interfaces/IPrincipalRegistry.sol";
 import {IPrincipalVault} from "./interfaces/IPrincipalVault.sol";
+import {PrincipalVault} from "./PrincipalVault.sol";
 
 /// @notice Binds a Cleanverse-verified controller to exact vault bytecode and one asset mandate.
 contract PrincipalRegistry is Ownable, IPrincipalRegistry {
@@ -13,6 +14,8 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
     error InvalidAddress();
     error InvalidExpiry(uint64 expiry, uint256 currentTimestamp);
     error VaultNotRegistered(address vault);
+    error VaultAlreadyCreated(address vault);
+    error UnexpectedFactoryVault(address vault, address expectedVault);
     error VaultAssetMismatch(address vault, address expectedAsset, address actualAsset);
     error VaultControllerMismatch(address vault, address expectedController, address actualController);
     error VaultReadFailed(address vault);
@@ -32,6 +35,7 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
     IAPassComplianceValidator public immutable validator;
     address public immutable asset;
     uint256 public immutable expectedChainId;
+    address public factoryVault;
     uint256 public nextPassportId = 1;
 
     mapping(uint256 passportId => Passport) private passports;
@@ -40,6 +44,7 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
 
     event CleanversePoolRuleRegistered(address indexed vault, bytes32 indexed ruleHash);
     event CleanverseVaultCviRegistered(address indexed vault, address indexed asset);
+    event VaultCreated(address indexed vault, address indexed principal, address indexed asset);
     event PassportRegistered(
         uint256 indexed passportId,
         address indexed principal,
@@ -61,19 +66,30 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
         expectedChainId = expectedChainId_;
     }
 
+    /// @notice Creates the single immutable pool that this role-holding factory may register with Cleanverse.
+    /// @dev The Validator requires registerV2 to be initiated by the factory that created the pool.
+    function createVault() external onlyOwner returns (PrincipalVault vault) {
+        if (factoryVault != address(0)) revert VaultAlreadyCreated(factoryVault);
+
+        vault = new PrincipalVault(owner(), IPrincipalRegistry(address(this)), asset);
+        factoryVault = address(vault);
+        emit VaultCreated(address(vault), owner(), asset);
+    }
+
     /// @notice Registers the pool's RuleV2 through this registry's Cleanverse REGISTER_ROLE.
     /// @dev This is intentionally separate from registerVaultCvi so both real Validator writes can confirm independently.
     function registerCleanversePoolRule(address vault, IAPassComplianceValidator.RuleV2 calldata rule)
         external
         onlyOwner
     {
-        if (vault.code.length == 0) revert InvalidAddress();
+        _requireFactoryVault(vault);
         validator.registerV2(vault, rule);
         emit CleanversePoolRuleRegistered(vault, keccak256(abi.encode(rule)));
     }
 
     /// @notice Gives an already registered pool the CVI required to hold the configured CVA.
     function registerVaultCvi(address vault) external onlyOwner {
+        _requireFactoryVault(vault);
         if (!validator.isRegistered(vault)) revert VaultNotRegistered(vault);
         validator.registerApass(vault, asset);
         emit CleanverseVaultCviRegistered(vault, asset);
@@ -82,7 +98,8 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
     /// @notice A vault controller creates a fresh passport. A prior vault passport becomes inactive.
     function registerPassport(address vault, uint128 amountCap, uint64 expiry) external returns (uint256 passportId) {
         _requireExpectedChain();
-        if (amountCap == 0 || vault.code.length == 0) revert InvalidAddress();
+        if (amountCap == 0) revert InvalidAddress();
+        _requireFactoryVault(vault);
         if (expiry <= block.timestamp) revert InvalidExpiry(expiry, block.timestamp);
         if (!validator.isRegistered(vault)) revert VaultNotRegistered(vault);
 
@@ -161,6 +178,12 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
 
     function _requireExpectedChain() private view {
         if (block.chainid != expectedChainId) revert UnsupportedChain(block.chainid, expectedChainId);
+    }
+
+    function _requireFactoryVault(address vault) private view {
+        if (vault == address(0) || vault != factoryVault || vault.code.length == 0) {
+            revert UnexpectedFactoryVault(vault, factoryVault);
+        }
     }
 
     function _vaultOwner(address vault) private view returns (address controller) {
