@@ -125,6 +125,35 @@ contract PrincipalRegistryTest is Test {
         assertEq(token.balanceOf(RECIPIENT), 0);
     }
 
+    function test_zeroAmountBlocksWithoutMovingFunds() external {
+        uint256 passportId = _registerPassport();
+
+        vm.prank(PRINCIPAL);
+        bool moved = vault.transferWithinMandate(RECIPIENT, 0, passportId);
+
+        assertFalse(moved);
+        assertEq(token.balanceOf(RECIPIENT), 0);
+        assertEq(token.balanceOf(address(vault)), 1_000e6);
+        assertEq(
+            uint256(registry.evaluate(passportId, address(vault), RECIPIENT, 0)),
+            uint256(IPrincipalRegistry.Decision.AMOUNT_CAP_EXCEEDED)
+        );
+    }
+
+    function test_capAppliesToEachTransferRatherThanCumulativeSpend() external {
+        uint256 passportId = _registerPassport();
+
+        vm.startPrank(PRINCIPAL);
+        bool firstMoved = vault.transferWithinMandate(RECIPIENT, 60e6, passportId);
+        bool secondMoved = vault.transferWithinMandate(RECIPIENT, 60e6, passportId);
+        vm.stopPrank();
+
+        assertTrue(firstMoved);
+        assertTrue(secondMoved);
+        assertEq(token.balanceOf(RECIPIENT), 120e6);
+        assertEq(token.balanceOf(address(vault)), 880e6);
+    }
+
     function testFuzz_permittedAmountsAtOrBelowCapMoveExactly(uint128 amount) external {
         uint256 passportId = _registerPassport();
         amount = uint128(bound(amount, 1, CAP));

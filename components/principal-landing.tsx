@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { authorityChecks, authorityNodes, type AuthorityNode } from "@/lib/principal/authority";
+import { principalDeployment } from "@/lib/principal/deployment";
 import { ArrowIcon, AssetIcon, BlockIcon, CheckIcon, ExternalIcon, Mark, PersonIcon, VaultIcon } from "./icons";
 
 function GraphNodeButton({ node, active, onSelect }: { node: AuthorityNode; active: boolean; onSelect: (node: AuthorityNode) => void }) {
@@ -33,7 +34,7 @@ export function PrincipalLanding() {
           <h1 id="hero-title">Authority,<br />made inspectable.</h1>
           <p>Principal binds a verified controller, a factory-created vault, and one Cleanverse asset before authority can be used.</p>
           <div className="hero-actions"><a className="button button-primary" href="/workspace">Open workspace <ArrowIcon size={17} /></a><a className="button button-secondary" href="#how-it-works">How it works</a></div>
-          <div className="hero-proof-row"><p className="hero-proof"><CheckIcon size={17} /> Read-only workspace, no wallet connection required</p><a href="https://testnet.monadscan.com/address/0x2683f26DDc6c2aF920Ee844150000a59FBBd4291" target="_blank" rel="noreferrer">View Monad testnet proof <ExternalIcon size={14} /></a></div>
+          <div className="hero-proof-row"><p className="hero-proof"><CheckIcon size={17} /> Read-only workspace, no wallet connection required</p><a href={`${principalDeployment.explorerUrl}/address/${principalDeployment.factoryAddress}`} target="_blank" rel="noreferrer">View Monad testnet proof <ExternalIcon size={14} /></a></div>
         </div>
 
         <div className="graph-wrap" aria-label="Principal authority graph">
@@ -44,7 +45,7 @@ export function PrincipalLanding() {
             <GraphNodeButton node="factory" active={selected === "factory"} onSelect={setSelected} />
             <span className="graph-line line-factory-vault" aria-hidden="true" />
             <GraphNodeButton node="vault" active={selected === "vault"} onSelect={setSelected} />
-            <span className="graph-line graph-line-blocked line-vault-asset" aria-hidden="true"><BlockIcon size={17} /></span>
+            <span className="graph-line line-vault-asset" aria-hidden="true" />
             <GraphNodeButton node="asset" active={selected === "asset"} onSelect={setSelected} />
           </div>
           <div className={`graph-inspector ${selectedNode.state}`}><span>{selectedNode.state === "verified" ? <CheckIcon size={16} /> : <BlockIcon size={16} />}</span><div><strong>{selectedNode.title}</strong><p>{selectedNode.detail}</p></div></div>
@@ -65,7 +66,7 @@ export function PrincipalLanding() {
         <div><p>Deterministic decision path</p><h2 id="decision-title">The transfer path has no hidden judgment.</h2><a href="/workspace">Inspect the real workspace <ArrowIcon size={16} /></a></div>
         <div className="decision-table" role="table" aria-label="Current authority decision">
           {authorityChecks.map((check) => <div role="row" key={check.label}><span role="cell">{check.label}</span><span role="cell">{check.value}</span><b className={check.state} role="cell">{check.state === "verified" ? <CheckIcon size={15} /> : <BlockIcon size={15} />}{check.state === "verified" ? "Verified" : "Blocked"}</b></div>)}
-          <div className="decision-total" role="row"><span role="cell">Current transfer decision</span><b role="cell">Blocked until pool registration</b></div>
+          <div className="decision-total" role="row"><span role="cell">Last proven decision</span><b role="cell">PERMITTED · 0.05 aUSDC</b></div>
         </div>
       </section>
 

@@ -6,7 +6,7 @@ Cleanverse CVI verifies wallets and CVA protects transfers, but a smart contract
 
 ## Solution
 
-Principal is a Monad contract-identity primitive. It binds one CVI-verified principal to one immutable vault, one CVA asset, one transfer capability, an amount cap, expiry, nonce, and code hash. Every protected transfer asks the onchain registry for a deterministic decision. A controller change, expired mandate, revoked passport, failed principal check, failed recipient check, or cap breach blocks movement.
+Principal is a Monad contract-identity primitive. It binds one CVI-verified principal to one immutable vault, one CVA asset, one transfer capability, a per-transfer amount cap, expiry, nonce, and code hash. Every protected transfer asks the onchain registry for a deterministic decision. A controller change, expired mandate, revoked passport, failed principal check, failed recipient check, zero amount, or per-transfer cap breach blocks movement.
 
 ## Cleanverse integration
 
@@ -20,7 +20,7 @@ Principal is a Monad contract-identity primitive. It binds one CVI-verified prin
 - Factory: `0xcf145f0730989137cce3b94863490e6ac0f84c8b`.
 - Factory-created vault: `0x0355E4c81d0bD4212A1c0402E0438DCd7ED52837`.
 - Factory role: confirmed `REGISTER_ROLE` onchain.
-- Validator pool: registered on Monad. Vault CVI for aUSDC: registered on Monad. Passport #1: issued with a 0.10 aUSDC cap. CVA proof: 0.05 aUSDC entered the vault and was returned through the permitted vault action. Final vault balance: zero.
+- Validator pool: registered on Monad. Vault CVI for aUSDC: registered on Monad. Passport #1: issued with a 0.10 aUSDC per-transfer cap. CVA proof: 0.05 aUSDC entered the vault and was returned through the permitted vault action. Final vault balance: zero.
 
 ## Why it matters
 

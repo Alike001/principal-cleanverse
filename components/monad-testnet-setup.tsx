@@ -42,7 +42,7 @@ export function MonadTestnetSetup() {
     <div>
       <p>Testnet setup</p>
       <h2 id="testnet-setup-title">Add Monad Testnet.</h2>
-      <p>Testnet MON pays gas. Principal stays read-only until the Validator pool is registered.</p>
+      <p>Testnet MON pays gas. Network setup never connects an account or grants Principal authority.</p>
     </div>
     <div className="testnet-setup-actions">
       <button type="button" className="workspace-button" onClick={handleAddNetwork} disabled={state === "adding"}>

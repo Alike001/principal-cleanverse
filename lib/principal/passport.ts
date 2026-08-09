@@ -13,7 +13,7 @@ export type EvidenceItem = {
 export const principalPassport = {
   chain: "Monad testnet",
   passportId: "#1",
-  state: "Transfer proof verified" as const,
+  state: "Onchain proof verified" as const,
   statusDetail: "Principal permitted a 0.05 aUSDC transfer from the CVI-registered vault back to the verified principal on Monad.",
   principal: "Active A-Pass wallet",
   registry: "0xcf14…4c8B",
@@ -22,8 +22,8 @@ export const principalPassport = {
   vaultAddress: "0x0355E4c81d0bD4212A1c0402E0438DCd7ED52837",
   codeHash: "0x796c…e59bc",
   asset: "aUSDC · 0xaC08…1f20D",
-  authority: "One aUSDC transfer capability, exercised",
-  cap: "0.10 aUSDC",
+  authority: "aUSDC transfer calls, per-call capped",
+  cap: "0.10 aUSDC per transfer",
   expiry: "24-hour passport window",
   nonce: "0",
   evidence: [
