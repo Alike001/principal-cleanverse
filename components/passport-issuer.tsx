@@ -5,6 +5,7 @@ import { principalDeployment } from "@/lib/principal/deployment";
 import {
   connectPassportIssuer,
   PassportIssuerInputError,
+  preflightPassportRevocation,
   preflightPassportIssuance,
   readActivePassportId,
   submitPassportIssuance,
@@ -40,6 +41,10 @@ export function PassportIssuer() {
   const [message, setMessage] = useState("Connect the vault controller. This never asks for a private key.");
   const [transactionHash, setTransactionHash] = useState("");
   const [issuedPassportId, setIssuedPassportId] = useState<bigint | null>(null);
+  const [revokePassportId, setRevokePassportId] = useState(String(principalDeployment.passportId));
+  const [revokeData, setRevokeData] = useState<string | null>(null);
+  const [revokeState, setRevokeState] = useState<"idle" | "checking" | "ready" | "submitting" | "submitted" | "error">("idle");
+  const [revokeMessage, setRevokeMessage] = useState("Revocation permanently makes the selected Passport inactive.");
 
   function provider() {
     if (!window.ethereum) throw new PassportIssuerInputError("Install an EVM wallet extension to issue a passport.");
@@ -98,6 +103,40 @@ export function PassportIssuer() {
     }
   }
 
+  async function validateRevocation(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!account) {
+      setRevokeState("error");
+      setRevokeMessage("Connect the Passport controller before validating revocation.");
+      return;
+    }
+    setRevokeState("checking");
+    setRevokeData(null);
+    try {
+      const result = await preflightPassportRevocation(provider(), { registry, account, passportId: revokePassportId });
+      setRevokeData(result.data);
+      setRevokeState("ready");
+      setRevokeMessage(`Monad simulated revocation using ${result.estimatedGas.toString()} gas units. Your wallet will ask for separate confirmation.`);
+    } catch (error) {
+      setRevokeState("error");
+      setRevokeMessage(messageFor(error));
+    }
+  }
+
+  async function revoke() {
+    if (!revokeData) return;
+    setRevokeState("submitting");
+    try {
+      const txHash = await submitPassportIssuance(provider(), { account, registry, data: revokeData });
+      await waitForTransactionReceipt(provider(), txHash);
+      setRevokeState("submitted");
+      setRevokeMessage(`Passport #${revokePassportId} is inactive. Load it in the inspector above to verify the final onchain state.`);
+    } catch (error) {
+      setRevokeState("error");
+      setRevokeMessage(messageFor(error));
+    }
+  }
+
   const canIssue = state === "ready" && Boolean(preflight);
   return <section className="issuer-section" aria-labelledby="passport-issuer-title">
     <div className="issuer-intro">
@@ -122,6 +161,15 @@ export function PassportIssuer() {
         <div><strong>{state === "submitted" ? "Passport submitted" : state === "ready" ? "Safe to confirm in wallet" : state === "error" ? "Issuance blocked" : "No authority changed"}</strong><p>{message}</p>{preflight && <small>Factory vault and controller match. Monad estimated {preflight.estimatedGas.toString()} gas units before wallet confirmation.</small>}{transactionHash && <a href={`${principalDeployment.explorerUrl}/tx/${transactionHash}`} target="_blank" rel="noreferrer">View transaction <ExternalIcon size={13} /></a>}{issuedPassportId !== null && <small>Inspect Passport #{issuedPassportId.toString()} using the live inspector above.</small>}</div>
       </div>
       <button className="issuer-submit" type="button" onClick={issue} disabled={!canIssue}>{state === "submitting" ? "Waiting for wallet" : "Create or renew Passport"}</button>
+      <section className="issuer-revoke" aria-labelledby="issuer-revoke-title">
+        <div><p>Emergency control</p><h3 id="issuer-revoke-title">Revoke a Passport</h3><span>Permanent onchain termination. This does not move any aUSDC.</span></div>
+        <form onSubmit={validateRevocation}>
+          <label htmlFor="revoke-passport-id">Passport ID<input id="revoke-passport-id" value={revokePassportId} onChange={(event) => { setRevokePassportId(event.target.value); setRevokeData(null); }} inputMode="numeric" autoComplete="off" /></label>
+          <button className="revoke-validate" type="submit" disabled={revokeState === "checking" || revokeState === "submitting"}>{revokeState === "checking" ? "Validating" : "Validate revocation"}</button>
+        </form>
+        <p className={`revoke-message ${revokeState}`} aria-live="polite">{revokeMessage}</p>
+        <button className="revoke-submit" type="button" onClick={revoke} disabled={revokeState !== "ready" || !revokeData}>{revokeState === "submitting" ? "Waiting for wallet" : "Revoke Passport"}</button>
+      </section>
     </div>
   </section>;
 }

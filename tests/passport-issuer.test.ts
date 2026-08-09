@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   connectPassportIssuer,
   encodeRegisterPassport,
+  encodeRevokePassport,
   parseAusdcAmount,
   preflightPassportIssuance,
   waitForTransactionReceipt,
@@ -23,6 +24,12 @@ describe("passport issuer", () => {
   it("rejects a cap that would silently lose aUSDC precision", () => {
     expect(() => parseAusdcAmount("0.0000001")).toThrow("up to 6 decimal places");
     expect(() => parseAusdcAmount("0")).toThrow("greater than zero");
+  });
+
+  it("encodes revocation without accepting a zero or fractional Passport ID", () => {
+    expect(encodeRevokePassport("2")).toBe(`0x92c3ad1d${"2".padStart(64, "0")}`);
+    expect(() => encodeRevokePassport("0")).toThrow("positive Passport ID");
+    expect(() => encodeRevokePassport("2.5")).toThrow("positive Passport ID");
   });
 
   it("only connects accounts after the wallet is on Monad", async () => {

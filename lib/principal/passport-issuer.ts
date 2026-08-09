@@ -4,6 +4,7 @@ const REGISTER_PASSPORT_SELECTOR = "0x53eba396";
 const FACTORY_VAULT_SELECTOR = "0x3a8e36be";
 const OWNER_SELECTOR = "0x8da5cb5b";
 const ACTIVE_PASSPORT_SELECTOR = "0x512823e5";
+const REVOKE_PASSPORT_SELECTOR = "0x92c3ad1d";
 
 export type PassportIssuerPreflight = {
   account: string;
@@ -58,6 +59,18 @@ export function encodeRegisterPassport(vault: string, amountCap: bigint, expiry:
   if (amountCap <= 0n || amountCap > (1n << 128n) - 1n) throw new PassportIssuerInputError("The amount cap is invalid.");
   if (expiry <= 0n || expiry > (1n << 64n) - 1n) throw new PassportIssuerInputError("The expiry is invalid.");
   return `${REGISTER_PASSPORT_SELECTOR}${addressWord(checkedVault)}${word(amountCap)}${word(expiry)}`;
+}
+
+export function parseIssuerPassportId(value: string) {
+  const normalized = value.trim();
+  if (!/^[1-9]\d*$/.test(normalized)) throw new PassportIssuerInputError("Enter a positive Passport ID.");
+  const passportId = BigInt(normalized);
+  if (passportId > (1n << 256n) - 1n) throw new PassportIssuerInputError("Passport ID is too large.");
+  return passportId;
+}
+
+export function encodeRevokePassport(passportId: string) {
+  return `${REVOKE_PASSPORT_SELECTOR}${word(parseIssuerPassportId(passportId))}`;
 }
 
 function decodeAddress(value: unknown, label: string) {
@@ -133,6 +146,21 @@ export async function submitPassportIssuance(provider: Eip1193Provider, input: {
     throw new PassportIssuerInputError("Your wallet did not return a transaction hash.");
   }
   return result;
+}
+
+export async function preflightPassportRevocation(
+  provider: Eip1193Provider,
+  input: { registry: string; account: string; passportId: string },
+) {
+  const registry = requireAddress(input.registry, "registry");
+  const account = requireAddress(input.account, "wallet");
+  const data = encodeRevokePassport(input.passportId);
+  await ensureMonadTestnet(provider);
+  const gas = await provider.request({ method: "eth_estimateGas", params: [{ from: account, to: registry, data }] });
+  if (typeof gas !== "string" || !/^0x[0-9a-fA-F]+$/.test(gas)) {
+    throw new PassportIssuerInputError("Monad could not simulate this Passport revocation.");
+  }
+  return { data, estimatedGas: BigInt(gas) };
 }
 
 export async function waitForTransactionReceipt(
