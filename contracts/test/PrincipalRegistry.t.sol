@@ -38,7 +38,7 @@ contract PrincipalRegistryTest is Test {
         validator.setEligible(address(vault), RECIPIENT, true);
     }
 
-    function test_registeredPassportBindsControllerCodeAssetAndNonce() external {
+    function test_registeredPassportBindsControllerCodeAssetAllowanceAndNonce() external {
         uint256 passportId = _registerPassport();
         PrincipalRegistry.Passport memory passport = registry.getPassport(passportId);
 
@@ -46,7 +46,8 @@ contract PrincipalRegistryTest is Test {
         assertEq(passport.vault, address(vault));
         assertEq(passport.runtimeCodeHash, address(vault).codehash);
         assertEq(passport.asset, address(token));
-        assertEq(passport.amountCap, CAP);
+        assertEq(passport.totalAllowance, CAP);
+        assertEq(passport.spent, 0);
         assertEq(passport.nonce, 0);
         assertTrue(passport.active);
     }
@@ -140,7 +141,7 @@ contract PrincipalRegistryTest is Test {
         );
     }
 
-    function test_capAppliesToEachTransferRatherThanCumulativeSpend() external {
+    function test_cumulativeAllowanceBlocksTheSecondTransferThatExceedsRemainingValue() external {
         uint256 passportId = _registerPassport();
 
         vm.startPrank(PRINCIPAL);
@@ -149,9 +150,14 @@ contract PrincipalRegistryTest is Test {
         vm.stopPrank();
 
         assertTrue(firstMoved);
-        assertTrue(secondMoved);
-        assertEq(token.balanceOf(RECIPIENT), 120e6);
-        assertEq(token.balanceOf(address(vault)), 880e6);
+        assertFalse(secondMoved);
+        assertEq(token.balanceOf(RECIPIENT), 60e6);
+        assertEq(token.balanceOf(address(vault)), 940e6);
+        assertEq(registry.getPassport(passportId).spent, 60e6);
+        assertEq(
+            uint256(registry.evaluate(passportId, address(vault), RECIPIENT, 60e6)),
+            uint256(IPrincipalRegistry.Decision.ALLOWANCE_EXHAUSTED)
+        );
     }
 
     function testFuzz_permittedAmountsAtOrBelowCapMoveExactly(uint128 amount) external {
@@ -164,6 +170,7 @@ contract PrincipalRegistryTest is Test {
         assertTrue(moved);
         assertEq(token.balanceOf(RECIPIENT), amount);
         assertEq(token.balanceOf(address(vault)), 1_000e6 - amount);
+        assertEq(registry.getPassport(passportId).spent, amount);
     }
 
     function testFuzz_amountsAboveCapNeverMoveFunds(uint128 extra) external {
@@ -176,6 +183,28 @@ contract PrincipalRegistryTest is Test {
         assertFalse(moved);
         assertEq(token.balanceOf(RECIPIENT), 0);
         assertEq(token.balanceOf(address(vault)), 1_000e6);
+    }
+
+    function test_failedCvaTransferDoesNotConsumeAllowance() external {
+        uint256 passportId = _registerPassport();
+        token.setFailTransfers(true);
+
+        vm.prank(PRINCIPAL);
+        vm.expectRevert();
+        vault.transferWithinMandate(RECIPIENT, 25e6, passportId);
+
+        assertEq(registry.getPassport(passportId).spent, 0);
+        assertEq(token.balanceOf(RECIPIENT), 0);
+    }
+
+    function test_onlyFactoryVaultCanConsumeAllowance() external {
+        uint256 passportId = _registerPassport();
+        vm.prank(OTHER);
+        vm.expectRevert(
+            abi.encodeWithSelector(PrincipalRegistry.UnauthorizedVaultConsumer.selector, OTHER, address(vault))
+        );
+        registry.consumeAllowance(passportId, RECIPIENT, 25e6);
+        assertEq(registry.getPassport(passportId).spent, 0);
     }
 
     function test_expiredPassportBlocksWithoutMovingFunds() external {

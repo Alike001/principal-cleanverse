@@ -19,13 +19,15 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
     error VaultAssetMismatch(address vault, address expectedAsset, address actualAsset);
     error VaultControllerMismatch(address vault, address expectedController, address actualController);
     error VaultReadFailed(address vault);
+    error UnauthorizedVaultConsumer(address caller, address expectedVault);
 
     struct Passport {
         address principal;
         address vault;
         bytes32 runtimeCodeHash;
         address asset;
-        uint128 amountCap;
+        uint128 totalAllowance;
+        uint128 spent;
         uint64 expiry;
         uint64 nonce;
         uint256 chainId;
@@ -51,11 +53,14 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
         address indexed vault,
         bytes32 runtimeCodeHash,
         address asset,
-        uint128 amountCap,
+        uint128 totalAllowance,
         uint64 expiry,
         uint64 nonce
     );
     event PassportRevoked(uint256 indexed passportId, address indexed principal);
+    event PassportAllowanceConsumed(
+        uint256 indexed passportId, address indexed vault, address indexed recipient, uint128 amount, uint128 spent
+    );
 
     constructor(address initialOwner, IAPassComplianceValidator validator_, address asset_, uint256 expectedChainId_)
         Ownable(initialOwner)
@@ -96,9 +101,12 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
     }
 
     /// @notice A vault controller creates a fresh passport. A prior vault passport becomes inactive.
-    function registerPassport(address vault, uint128 amountCap, uint64 expiry) external returns (uint256 passportId) {
+    function registerPassport(address vault, uint128 totalAllowance, uint64 expiry)
+        external
+        returns (uint256 passportId)
+    {
         _requireExpectedChain();
-        if (amountCap == 0) revert InvalidAddress();
+        if (totalAllowance == 0) revert InvalidAddress();
         _requireFactoryVault(vault);
         if (expiry <= block.timestamp) revert InvalidExpiry(expiry, block.timestamp);
         if (!validator.isRegistered(vault)) revert VaultNotRegistered(vault);
@@ -119,7 +127,8 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
             vault: vault,
             runtimeCodeHash: vault.codehash,
             asset: asset,
-            amountCap: amountCap,
+            totalAllowance: totalAllowance,
+            spent: 0,
             expiry: expiry,
             nonce: nonce,
             chainId: block.chainid,
@@ -127,7 +136,7 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
         });
         activePassportForVault[vault] = passportId;
 
-        emit PassportRegistered(passportId, msg.sender, vault, vault.codehash, asset, amountCap, expiry, nonce);
+        emit PassportRegistered(passportId, msg.sender, vault, vault.codehash, asset, totalAllowance, expiry, nonce);
     }
 
     function revokePassport(uint256 passportId) external {
@@ -146,6 +155,33 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
         view
         returns (Decision)
     {
+        return _evaluate(passportId, vault, recipient, amount);
+    }
+
+    /// @notice Atomically consumes a Passport's remaining allowance before the vault transfers CVA.
+    /// @dev If the subsequent CVA transfer reverts, this state update reverts with it.
+    function consumeAllowance(uint256 passportId, address recipient, uint256 amount)
+        external
+        returns (Decision decision)
+    {
+        if (msg.sender != factoryVault) revert UnauthorizedVaultConsumer(msg.sender, factoryVault);
+        if (amount > type(uint128).max) return Decision.AMOUNT_CAP_EXCEEDED;
+        decision = _evaluate(passportId, msg.sender, recipient, amount);
+        if (decision != Decision.PERMITTED) return decision;
+
+        Passport storage passport = passports[passportId];
+        // Safe after the explicit uint128 upper bound above.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint128 consumed = uint128(amount);
+        passport.spent += consumed;
+        emit PassportAllowanceConsumed(passportId, msg.sender, recipient, consumed, passport.spent);
+    }
+
+    function _evaluate(uint256 passportId, address vault, address recipient, uint256 amount)
+        private
+        view
+        returns (Decision)
+    {
         Passport storage passport = passports[passportId];
         if (passport.principal == address(0)) return Decision.PASSPORT_NOT_FOUND;
         if (!passport.active) return Decision.PASSPORT_INACTIVE;
@@ -155,7 +191,8 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
         if (vault.codehash != passport.runtimeCodeHash) return Decision.CODE_MISMATCH;
         if (_vaultOwnerOrZero(vault) != passport.principal) return Decision.CONTROLLER_MISMATCH;
         if (_vaultAssetOrZero(vault) != passport.asset) return Decision.ASSET_MISMATCH;
-        if (amount == 0 || amount > passport.amountCap) return Decision.AMOUNT_CAP_EXCEEDED;
+        if (amount == 0 || amount > type(uint128).max) return Decision.AMOUNT_CAP_EXCEEDED;
+        if (amount > uint256(passport.totalAllowance) - passport.spent) return Decision.ALLOWANCE_EXHAUSTED;
 
         try validator.complianceVerify(vault, passport.principal) returns (bool principalEligible) {
             if (!principalEligible) return Decision.PRINCIPAL_INELIGIBLE;

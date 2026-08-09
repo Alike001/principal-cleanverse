@@ -46,12 +46,29 @@ describe("live passport reader", () => {
       passportId: "2",
       vault: vault.toLowerCase(),
       asset: cva.toLowerCase(),
-      amountCap: "100000",
+      totalAllowance: "100000",
+      spent: null,
       expiry: "1786899878",
       nonce: "1",
       chainId: "10143",
       active: true,
     });
+  });
+
+  it("decodes a cumulative Passport without breaking historical Passport reads", () => {
+    const cumulative = `0x${[
+      "0x2910E6AbE8FE3E9387921aAdc91C1e453b2019d2",
+      vault,
+      "0x7a824ba8287eace6a4ffc93ad13df2a8d0d403e40b418b96e45917061339edee",
+      cva,
+      "100000",
+      "25000",
+      "1786899878",
+      "1",
+      "10143",
+      "1",
+    ].map(word).join("")}`;
+    expect(decodePassportResult(registry, 3n, cumulative)).toMatchObject({ totalAllowance: "100000", spent: "25000" });
   });
 
   it("rejects malformed tuples and invalid active flags", () => {

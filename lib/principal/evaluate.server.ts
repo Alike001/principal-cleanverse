@@ -21,6 +21,7 @@ export const principalDecisionNames = [
   "RECIPIENT_INELIGIBLE",
   "VALIDATOR_UNAVAILABLE",
   "WRONG_CHAIN",
+  "ALLOWANCE_EXHAUSTED",
 ] as const;
 
 export type PrincipalDecision = (typeof principalDecisionNames)[number];

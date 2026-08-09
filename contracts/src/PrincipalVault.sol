@@ -39,7 +39,7 @@ contract PrincipalVault is Ownable {
         onlyOwner
         returns (bool)
     {
-        IPrincipalRegistry.Decision decision = registry.evaluate(passportId, address(this), recipient, amount);
+        IPrincipalRegistry.Decision decision = registry.consumeAllowance(passportId, recipient, amount);
         if (decision != IPrincipalRegistry.Decision.PERMITTED) {
             emit TransferBlocked(passportId, msg.sender, recipient, amount, decision);
             return false;

@@ -13,7 +13,8 @@ type LivePassport = {
   vault: string;
   runtimeCodeHash: string;
   asset: string;
-  amountCap: string;
+  totalAllowance: string;
+  spent: string | null;
   expiry: string;
   nonce: string;
   chainId: string;
@@ -28,11 +29,16 @@ function shorten(value: string, head = 6, tail = 4) {
   return value.length > head + tail + 1 ? `${value.slice(0, head)}…${value.slice(-tail)}` : value;
 }
 
-function formatUnits(value: string) {
+function formatUnits(value: string, suffix = "aUSDC per transfer") {
   const units = BigInt(value);
   const whole = units / 1_000_000n;
   const fraction = (units % 1_000_000n).toString().padStart(6, "0").replace(/0+$/, "");
-  return `${whole}${fraction ? `.${fraction}` : ""} aUSDC per transfer`;
+  return `${whole}${fraction ? `.${fraction}` : ""} ${suffix}`;
+}
+
+function remainingAllowance(passport: LivePassport) {
+  if (passport.spent === null) return null;
+  return (BigInt(passport.totalAllowance) - BigInt(passport.spent)).toString();
 }
 
 function formatExpiry(value: string) {
@@ -164,8 +170,9 @@ export function ContractPassport() {
             <PassportField label="Factory"><CopyValue label="factory address" display={shorten(displayRegistry)} value={displayRegistry} /></PassportField>
             <PassportField label="Runtime code hash"><span className="muted-value">{passport ? shorten(passport.runtimeCodeHash, 8, 6) : principalPassport.codeHash}</span></PassportField>
             <PassportField label="CVA"><span className="inline-icon"><AssetIcon size={16} />{passport ? shorten(passport.asset) : principalPassport.asset}</span></PassportField>
-            <PassportField label="Permitted action"><span>{passport ? "CVA transfer calls, per-call capped" : principalPassport.authority}</span></PassportField>
-            <PassportField label="Per-transfer cap"><span className="mono">{passport ? formatUnits(passport.amountCap) : principalPassport.cap}</span></PassportField>
+            <PassportField label="Permitted action"><span>{passport ? passport.spent === null ? "CVA transfer calls, per-call capped" : "CVA transfer calls, cumulatively bounded" : principalPassport.authority}</span></PassportField>
+            <PassportField label={passport && passport.spent !== null ? "Total allowance" : "Per-transfer cap"}><span className="mono">{passport ? formatUnits(passport.totalAllowance, passport.spent === null ? "aUSDC per transfer" : "aUSDC total") : principalPassport.cap}</span></PassportField>
+            {passport && passport.spent !== null && <PassportField label="Remaining allowance"><span className="mono">{formatUnits(remainingAllowance(passport) || "0", "aUSDC available")}</span></PassportField>}
             <PassportField label="Expiry"><span>{passport ? formatExpiry(passport.expiry) : principalPassport.expiry}</span></PassportField>
             <PassportField label="Nonce"><span className="mono">{passport?.nonce || principalPassport.nonce}</span></PassportField>
           </dl>

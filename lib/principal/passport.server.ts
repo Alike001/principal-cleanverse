@@ -21,7 +21,8 @@ export type LivePassport = {
   vault: string;
   runtimeCodeHash: string;
   asset: string;
-  amountCap: string;
+  totalAllowance: string;
+  spent: string | null;
   expiry: string;
   nonce: string;
   chainId: string;
@@ -66,16 +67,17 @@ function decodeAddress(word: string) {
 }
 
 export function decodePassportResult(registry: string, passportId: bigint, result: string): LivePassport {
-  if (!/^0x[0-9a-fA-F]{576}$/.test(result)) {
+  if (!/^0x[0-9a-fA-F]{576}(?:[0-9a-fA-F]{64})?$/.test(result)) {
     throw new PrincipalPassportRpcError("Monad returned an invalid Passport response.");
   }
 
   const words = result.slice(2).match(/.{64}/g);
-  if (!words || words.length !== 9) {
+  if (!words || (words.length !== 9 && words.length !== 10)) {
     throw new PrincipalPassportRpcError("Monad returned an incomplete Passport response.");
   }
 
-  const activeValue = BigInt(`0x${words[8]}`);
+  const isCumulativeAllowance = words.length === 10;
+  const activeValue = BigInt(`0x${words[isCumulativeAllowance ? 9 : 8]}`);
   if (activeValue !== 0n && activeValue !== 1n) {
     throw new PrincipalPassportRpcError("Monad returned an invalid Passport active flag.");
   }
@@ -87,10 +89,11 @@ export function decodePassportResult(registry: string, passportId: bigint, resul
     vault: decodeAddress(words[1]),
     runtimeCodeHash: `0x${words[2]}`,
     asset: decodeAddress(words[3]),
-    amountCap: BigInt(`0x${words[4]}`).toString(),
-    expiry: BigInt(`0x${words[5]}`).toString(),
-    nonce: BigInt(`0x${words[6]}`).toString(),
-    chainId: BigInt(`0x${words[7]}`).toString(),
+    totalAllowance: BigInt(`0x${words[4]}`).toString(),
+    spent: isCumulativeAllowance ? BigInt(`0x${words[5]}`).toString() : null,
+    expiry: BigInt(`0x${words[isCumulativeAllowance ? 6 : 5]}`).toString(),
+    nonce: BigInt(`0x${words[isCumulativeAllowance ? 7 : 6]}`).toString(),
+    chainId: BigInt(`0x${words[isCumulativeAllowance ? 8 : 7]}`).toString(),
     active: activeValue === 1n,
   };
 }

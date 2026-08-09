@@ -15,11 +15,14 @@ interface IPrincipalRegistry {
         PRINCIPAL_INELIGIBLE,
         RECIPIENT_INELIGIBLE,
         VALIDATOR_UNAVAILABLE,
-        WRONG_CHAIN
+        WRONG_CHAIN,
+        ALLOWANCE_EXHAUSTED
     }
 
     function evaluate(uint256 passportId, address vault, address recipient, uint256 amount)
         external
         view
         returns (Decision);
+
+    function consumeAllowance(uint256 passportId, address recipient, uint256 amount) external returns (Decision);
 }
