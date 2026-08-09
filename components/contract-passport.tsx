@@ -66,7 +66,7 @@ export function ContractPassport() {
   const [registry, setRegistry] = useState<string>(principalDeployment.factoryAddress);
   const [passportId, setPassportId] = useState<string>(String(principalDeployment.passportId));
   const [recipient, setRecipient] = useState(principalPassport.vaultAddress);
-  const [amount, setAmount] = useState("0.05");
+  const [amount, setAmount] = useState("0.40");
   const [expanded, setExpanded] = useState(false);
   const [livePassport, setLivePassport] = useState<LivePassport | null>(null);
   const [loadState, setLoadState] = useState<{ state: "idle" | "loading" | "error"; message: string }>({
@@ -206,7 +206,7 @@ export function ContractPassport() {
             <ArrowIcon className="relationship-arrow" size={20} />
             <div className="relationship-node is-verified"><VaultIcon size={19} /><span><strong>PrincipalVault</strong><small>{passport ? "Bound by Passport" : "Deployed"}</small></span></div>
             <ArrowIcon className="relationship-arrow" size={20} />
-            <div className="relationship-node is-verified"><AssetIcon size={19} /><span><strong>CVA transfer</strong><small>{passport ? "Preflighted live" : "0.05 aUSDC proven"}</small></span></div>
+            <div className="relationship-node is-verified"><AssetIcon size={19} /><span><strong>CVA transfer</strong><small>{passport ? "Preflighted live" : "0.60 aUSDC proven"}</small></span></div>
           </div>
 
           <div className="passport-footer"><span>Chain: Monad testnet</span><div><button type="button" className="text-button" onClick={copyPassportLink}>Copy inspection link</button><button type="button" className="text-button" onClick={() => setExpanded(!expanded)}>{expanded ? "Hide evidence details" : "Show evidence details"}</button></div></div>

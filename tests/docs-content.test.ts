@@ -19,7 +19,7 @@ describe("public product navigation", () => {
   it("shows the final factory and removes the obsolete blocked-pool state", () => {
     expect(landing).toContain("principalDeployment.factoryAddress");
     expect(landing).not.toContain("0x2683f26DDc6c2aF920Ee844150000a59FBBd4291");
-    expect(landing).toContain("PERMITTED · 0.05 aUSDC");
+    expect(landing).toContain("0.40 aUSDC available");
     expect(workspace).toContain("Check authority");
     expect(workspace).toContain("Load Passport");
     expect(workspace).toContain("Principal registry");

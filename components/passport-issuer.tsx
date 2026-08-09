@@ -33,7 +33,7 @@ function messageFor(error: unknown) {
 export function PassportIssuer() {
   const [registry, setRegistry] = useState<string>(principalDeployment.factoryAddress);
   const [vault, setVault] = useState<string>(principalDeployment.vaultAddress);
-  const [amountCap, setAmountCap] = useState<string>(principalDeployment.perTransferCap);
+  const [amountCap, setAmountCap] = useState<string>(principalDeployment.totalAllowance);
   const [expiry, setExpiry] = useState("");
   const [account, setAccount] = useState("");
   const [preflight, setPreflight] = useState<PassportIssuerPreflight | null>(null);
@@ -151,7 +151,7 @@ export function PassportIssuer() {
         <div className="issuer-fields">
           <label htmlFor="issuer-registry">Principal registry<input id="issuer-registry" value={registry} onChange={(event) => { setRegistry(event.target.value); setPreflight(null); }} autoComplete="off" /></label>
           <label htmlFor="issuer-vault">Factory vault<input id="issuer-vault" value={vault} onChange={(event) => { setVault(event.target.value); setPreflight(null); }} autoComplete="off" /></label>
-          <label htmlFor="issuer-cap">Per-transfer cap<input id="issuer-cap" value={amountCap} onChange={(event) => { setAmountCap(event.target.value); setPreflight(null); }} inputMode="decimal" autoComplete="off" /><small>aUSDC, max per approved transfer call</small></label>
+          <label htmlFor="issuer-cap">Total allowance<input id="issuer-cap" value={amountCap} onChange={(event) => { setAmountCap(event.target.value); setPreflight(null); }} inputMode="decimal" autoComplete="off" /><small>aUSDC, cumulative across every permitted transfer</small></label>
           <label htmlFor="issuer-expiry">Expiry<input id="issuer-expiry" type="datetime-local" value={expiry} onChange={(event) => { setExpiry(event.target.value); setPreflight(null); }} required /><small>Choose a future date. The contract enforces it on Monad.</small></label>
         </div>
         <button className="primary-action" type="submit" disabled={state === "checking" || state === "submitting"}>{state === "checking" ? "Validating on Monad" : "Validate issuance"}</button>

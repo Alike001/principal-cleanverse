@@ -37,12 +37,12 @@ function addressWord(value: string) {
 export function parseAusdcAmount(value: string) {
   const normalized = value.trim();
   if (!/^\d+(?:\.\d{1,6})?$/.test(normalized)) {
-    throw new PassportIssuerInputError("Enter an aUSDC cap with up to 6 decimal places.");
+    throw new PassportIssuerInputError("Enter a total aUSDC allowance with up to 6 decimal places.");
   }
   const [whole, fraction = ""] = normalized.split(".");
   const units = BigInt(whole) * 1_000_000n + BigInt(fraction.padEnd(6, "0"));
-  if (units === 0n) throw new PassportIssuerInputError("The per-transfer cap must be greater than zero.");
-  if (units > (1n << 128n) - 1n) throw new PassportIssuerInputError("The cap is too large for a Principal passport.");
+  if (units === 0n) throw new PassportIssuerInputError("The total allowance must be greater than zero.");
+  if (units > (1n << 128n) - 1n) throw new PassportIssuerInputError("The total allowance is too large for a Principal passport.");
   return units;
 }
 

@@ -8,16 +8,16 @@ import {
   waitForTransactionReceipt,
 } from "../lib/principal/passport-issuer";
 
-const registry = "0xcf145f0730989137cce3b94863490e6ac0f84c8b";
-const vault = "0x0355e4c81d0bd4212a1c0402e0438dcd7ed52837";
+const registry = "0xab048434357b70ec7b7773ea3ef595a774cb7b5b";
+const vault = "0x1115a4c26e6a4ed66c234b5290c3d427cb1c9335";
 const account = "0x1111111111111111111111111111111111111111";
 const wordAddress = (value: string) => `0x${"0".repeat(24)}${value.slice(2)}`;
 
 describe("passport issuer", () => {
   it("encodes the exact registerPassport call with 6-decimal aUSDC units", () => {
-    expect(parseAusdcAmount("0.10")).toBe(100000n);
-    expect(encodeRegisterPassport(vault, 100000n, 1_800_000_000n)).toBe(
-      `0x53eba396${vault.slice(2).padStart(64, "0")}${(100000n).toString(16).padStart(64, "0")}${(1_800_000_000n).toString(16).padStart(64, "0")}`,
+    expect(parseAusdcAmount("1.00")).toBe(1_000_000n);
+    expect(encodeRegisterPassport(vault, 1_000_000n, 1_800_000_000n)).toBe(
+      `0x53eba396${vault.slice(2).padStart(64, "0")}${(1_000_000n).toString(16).padStart(64, "0")}${(1_800_000_000n).toString(16).padStart(64, "0")}`,
     );
   });
 
@@ -49,7 +49,7 @@ describe("passport issuer", () => {
       registry,
       vault,
       account,
-      amountCap: "0.10",
+      amountCap: "1.00",
       expiry: "2030-01-01T00:00",
     })).rejects.toThrow("not this vault's controller");
     expect(request).not.toHaveBeenCalledWith(expect.objectContaining({ method: "eth_sendTransaction" }));

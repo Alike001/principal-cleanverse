@@ -4,9 +4,9 @@ import { authorityChecks, authorityNodes } from "../lib/principal/authority";
 describe("authority graph facts", () => {
   it("shows the verified Cleanverse pool and vault CVI state", () => {
     expect(authorityNodes.asset.state).toBe("verified");
-    expect(authorityNodes.asset.detail).toContain("0.05 aUSDC transfer entered");
+    expect(authorityNodes.asset.detail).toContain("1.00 aUSDC funding transfer entered");
     expect(authorityChecks.find((check) => check.label === "Passport transfer")).toMatchObject({
-      value: "0.05 aUSDC permitted",
+      value: "0.60 aUSDC consumed",
       state: "verified",
     });
   });

@@ -26,8 +26,8 @@ describe("Principal live preflight", () => {
     expect(() => parseAssetAmount(amount)).toThrow(PrincipalInputError);
   });
 
-  it("encodes the deployed Passport #2 evaluate call", () => {
-    const call = encodeEvaluateCall(principalDeployment.vaultAddress, principalDeployment.vaultAddress, 50_000n);
+  it("encodes the deployed cumulative Passport #1 evaluate call", () => {
+    const call = encodeEvaluateCall(principalDeployment.vaultAddress, principalDeployment.vaultAddress, 400_000n);
     expect(call).toHaveLength(2 + 8 + 64 * 4);
     expect(call).toMatch(/^0x7e8e89cb/);
     expect(call.toLowerCase()).toContain(principalDeployment.vaultAddress.slice(2).toLowerCase());
@@ -37,11 +37,12 @@ describe("Principal live preflight", () => {
     const passportResult = `0x${[
       principalDeployment.vaultAddress,
       principalDeployment.vaultAddress,
-      "0x7a824ba8287eace6a4ffc93ad13df2a8d0d403e40b418b96e45917061339edee",
+      "0x1b605d14b428a05a706a0021335c38731890b3fa471f76667e3e2d7a607108f2",
       principalDeployment.cvaAddress,
-      "100000",
-      "1786899878",
-      "1",
+      "1000000",
+      "600000",
+      "1786909103",
+      "0",
       "10143",
       "1",
     ].map((value) => BigInt(value).toString(16).padStart(64, "0")).join("")}`;
@@ -50,7 +51,7 @@ describe("Principal live preflight", () => {
       .mockResolvedValueOnce(rpcResponse(`0x${"0".repeat(64)}`));
     const result = await evaluatePrincipalPassport(
       principalDeployment.vaultAddress,
-      "0.05",
+      "0.40",
       {},
       fetcher,
       "https://rpc.example",
@@ -63,32 +64,33 @@ describe("Principal live preflight", () => {
   });
 
   it("returns deterministic blocked decisions", async () => {
-    const encoded = (8n).toString(16).padStart(64, "0");
+    const encoded = (13n).toString(16).padStart(64, "0");
     const passportResult = `0x${[
       principalDeployment.vaultAddress,
       principalDeployment.vaultAddress,
-      "0x7a824ba8287eace6a4ffc93ad13df2a8d0d403e40b418b96e45917061339edee",
+      "0x1b605d14b428a05a706a0021335c38731890b3fa471f76667e3e2d7a607108f2",
       principalDeployment.cvaAddress,
-      "100000",
-      "1786899878",
-      "1",
+      "1000000",
+      "600000",
+      "1786909103",
+      "0",
       "10143",
       "1",
     ].map((value) => BigInt(value).toString(16).padStart(64, "0")).join("")}`;
     const result = await evaluatePrincipalPassport(
       principalDeployment.vaultAddress,
-      "0.11",
+      "0.50",
       {},
       vi.fn().mockResolvedValueOnce(rpcResponse(passportResult)).mockResolvedValueOnce(rpcResponse(`0x${encoded}`)),
     );
-    expect(result).toMatchObject({ decision: "AMOUNT_CAP_EXCEEDED", permitted: false });
+    expect(result).toMatchObject({ decision: "ALLOWANCE_EXHAUSTED", permitted: false });
   });
 
   it("fails closed on malformed RPC data", async () => {
     await expect(
       evaluatePrincipalPassport(
         principalDeployment.vaultAddress,
-        "0.05",
+        "0.40",
         {},
         vi.fn().mockResolvedValue(rpcResponse("0x01")),
       ),
@@ -99,11 +101,12 @@ describe("Principal live preflight", () => {
     const passportResult = `0x${[
       principalDeployment.vaultAddress,
       principalDeployment.vaultAddress,
-      "0x7a824ba8287eace6a4ffc93ad13df2a8d0d403e40b418b96e45917061339edee",
+      "0x1b605d14b428a05a706a0021335c38731890b3fa471f76667e3e2d7a607108f2",
       principalDeployment.cvaAddress,
-      "100000",
-      "1786899878",
-      "1",
+      "1000000",
+      "600000",
+      "1786909103",
+      "0",
       "10143",
       "1",
     ].map((value) => BigInt(value).toString(16).padStart(64, "0")).join("")}`;
@@ -114,7 +117,7 @@ describe("Principal live preflight", () => {
 
     const result = await evaluatePrincipalPassport(
       principalDeployment.vaultAddress,
-      "0.05",
+      "0.40",
       {},
       fetcher,
       "https://stale-rpc.example",

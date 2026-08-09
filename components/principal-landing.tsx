@@ -66,7 +66,7 @@ export function PrincipalLanding() {
         <div><p>Deterministic decision path</p><h2 id="decision-title">The transfer path has no hidden judgment.</h2><a href="/workspace">Inspect the real workspace <ArrowIcon size={16} /></a></div>
         <div className="decision-table" role="table" aria-label="Current authority decision">
           {authorityChecks.map((check) => <div role="row" key={check.label}><span role="cell">{check.label}</span><span role="cell">{check.value}</span><b className={check.state} role="cell">{check.state === "verified" ? <CheckIcon size={15} /> : <BlockIcon size={15} />}{check.state === "verified" ? "Verified" : "Blocked"}</b></div>)}
-          <div className="decision-total" role="row"><span role="cell">Last proven decision</span><b role="cell">PERMITTED · 0.05 aUSDC</b></div>
+          <div className="decision-total" role="row"><span role="cell">Live allowance state</span><b role="cell">0.40 aUSDC available</b></div>
         </div>
       </section>
 
