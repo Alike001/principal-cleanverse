@@ -3,7 +3,7 @@ import { principalPassport } from "../lib/principal/passport";
 
 describe("principal passport snapshot", () => {
   it("reports the completed passport-controlled transfer proof", () => {
-    expect(principalPassport.state).toBe("Onchain proof verified");
+    expect(principalPassport.state).toBe("Historical testnet proof");
     expect(principalPassport.statusDetail).toContain("0.05 aUSDC transfer");
     expect(principalPassport.evidence.at(-1)).toMatchObject({
       title: "Passport transfer verified",
@@ -15,7 +15,9 @@ describe("principal passport snapshot", () => {
   it("keeps the known scope narrow and public evidence redacted", () => {
     expect(principalPassport.authority).toBe("aUSDC transfer calls, per-call capped");
     expect(principalPassport.cap).toBe("0.10 aUSDC per transfer");
-    expect(principalPassport.principal).toBe("Active A-Pass wallet");
+    expect(principalPassport.principal).toBe("CVI verified in recorded proof");
     expect(principalPassport.principal).not.toMatch(/^0x[0-9a-f]{40}$/i);
+    expect(principalPassport.codeHash).toBe("0x7a82…39edee");
+    expect(principalPassport.expiry).toBe("2026-08-10 14:00 UTC");
   });
 });

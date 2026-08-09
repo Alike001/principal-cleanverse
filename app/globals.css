@@ -58,6 +58,9 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .decision-total b { color: #6ce9a6; }
 .status-verified { color: #027a48; border-color: #a6f4c5; background: #ecfdf3; }
 .status-explanation-verified { color: #05603a; border-bottom-color: #a6f4c5; background: #ecfdf3; }
+.status-historical { color: #6941c6; border-color: #d9d6fe; background: #f4f3ff; }
+.status-explanation-historical { color: #4a1fb8; border-bottom-color: #d9d6fe; background: #f9f5ff; }
+.is-historical > svg, .preflight-summary .historical svg { color: #7f56d9; }
 .primary-action { color: #fff; border-color: #155eef; background: #155eef; cursor: pointer; }
 .primary-action:hover { background: #004eeb; }
 .primary-action:disabled { color: #98a2b3; border-color: #d0d5dd; background: #f2f4f7; cursor: wait; }

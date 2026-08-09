@@ -2,9 +2,9 @@
 
 Principal makes the controller of a smart contract explicit before it can move a Cleanverse Verified Asset. It binds one verified CVI principal, one immutable vault, one aUSDC action, a per-transfer cap, expiry, and a deterministic onchain decision.
 
-## Current Monad testnet evidence
+## Recorded Monad testnet proof
 
-- A Cleanverse A-Pass is active for the configured principal.
+- On Aug. 9, 2026, Cleanverse A-Pass and CVA checks permitted the recorded Principal flow. The web app labels this as historical proof. Its live read-only preflight is the source of truth for the current decision.
 - Principal factory: [`0xcf14…4c8B`](https://testnet.monadscan.com/address/0xcf145f0730989137cce3b94863490e6ac0f84c8b)
 - Factory-created vault: [`0x0355…2837`](https://testnet.monadscan.com/address/0x0355E4c81d0bD4212A1c0402E0438DCd7ED52837)
 - The factory has the Validator `REGISTER_ROLE` onchain.
@@ -25,7 +25,7 @@ pnpm dev
 
 Open `http://localhost:3000`. The landing page, workspace, evidence links, and live read-only passport check work without a wallet, private key, or Cleanverse credentials. The check calls the deployed registry with Monad `eth_call`, so it never signs or broadcasts a transaction.
 
-Copy `.env.example` to `.env.local` only if you need the optional server-side Cleanverse CVI refresh. That route requires `CLEANVERSE_API_ID`, `CLEANVERSE_API_KEY`, and `DEMO_PRINCIPAL_ADDRESS`. Keep those values on the server and never expose them through `NEXT_PUBLIC_` variables.
+Copy `.env.example` to `.env.local` only if you need the optional server-side Cleanverse CVI refresh. That route requires `CLEANVERSE_API_ID`, `CLEANVERSE_API_KEY`, and `DEMO_PRINCIPAL_ADDRESS`. Keep those values on the server. The live passport evaluator does not need Cleanverse credentials.
 
 ## Verify
 

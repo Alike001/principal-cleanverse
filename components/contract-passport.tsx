@@ -26,9 +26,9 @@ export function ContractPassport() {
   const [recipient, setRecipient] = useState(principalPassport.vaultAddress);
   const [amount, setAmount] = useState("0.05");
   const [expanded, setExpanded] = useState(false);
-  const [cviState, setCviState] = useState<"registered" | "unavailable">("registered");
+  const [cviState, setCviState] = useState<"snapshot" | "registered" | "unavailable">("snapshot");
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshMessage, setRefreshMessage] = useState("Verified snapshot loaded");
+  const [refreshMessage, setRefreshMessage] = useState("Historical CVI proof is shown. Refresh to check the optional Cleanverse route.");
   const [preflight, setPreflight] = useState<{
     state: "idle" | "checking" | "complete" | "error";
     decision?: string;
@@ -104,14 +104,14 @@ export function ContractPassport() {
             </div>
             <div className="passport-header-meta">
               <span className="passport-id">Passport: {principalPassport.passportId}</span>
-              <div className="status status-verified"><CheckIcon size={16} />{principalPassport.state}</div>
+              <div className="status status-historical"><CheckIcon size={16} />{principalPassport.state}</div>
             </div>
           </div>
 
-          <p className="status-explanation status-explanation-verified">{principalPassport.statusDetail}</p>
+          <p className="status-explanation status-explanation-historical">{principalPassport.statusDetail} The live preflight is the source of truth for a current permit or block.</p>
 
           <dl className="passport-grid">
-            <PassportField label="Verified principal" tone={cviState === "registered" ? "blue" : "muted"}><span className="inline-icon"><PersonIcon size={16} />{cviState === "registered" ? principalPassport.principal : "CVI state unavailable"}</span></PassportField>
+            <PassportField label="Verified principal" tone={cviState === "registered" ? "blue" : "muted"}><span className="inline-icon"><PersonIcon size={16} />{cviState === "unavailable" ? "CVI state unavailable" : principalPassport.principal}</span></PassportField>
             <PassportField label="Vault"><CopyValue label="vault address" display={principalPassport.vault} value={principalPassport.vaultAddress} /></PassportField>
             <PassportField label="Factory"><CopyValue label="factory address" display={principalPassport.registry} value={principalPassport.registryAddress} /></PassportField>
             <PassportField label="Runtime code hash"><span className="muted-value">{principalPassport.codeHash}</span></PassportField>
@@ -123,7 +123,7 @@ export function ContractPassport() {
           </dl>
 
           <div className="relationship" aria-label="Authority relationship">
-            <div className="relationship-node is-verified"><PersonIcon size={19} /><span><strong>Verified principal</strong><small>{cviState === "registered" ? "CVI active" : "Read unavailable"}</small></span></div>
+            <div className={`relationship-node ${cviState === "registered" ? "is-verified" : "is-historical"}`}><PersonIcon size={19} /><span><strong>Verified principal</strong><small>{cviState === "registered" ? "CVI active" : cviState === "snapshot" ? "Recorded proof" : "Read unavailable"}</small></span></div>
             <ArrowIcon className="relationship-arrow" size={20} />
             <div className="relationship-node is-verified"><VaultIcon size={19} /><span><strong>PrincipalVault</strong><small>Deployed</small></span></div>
             <ArrowIcon className="relationship-arrow" size={20} />
@@ -131,7 +131,7 @@ export function ContractPassport() {
           </div>
 
           <div className="passport-footer"><span>Chain: {principalPassport.chain}</span><button type="button" className="text-button" onClick={() => setExpanded(!expanded)}>{expanded ? "Hide evidence details" : "Show evidence details"}</button></div>
-          {expanded && <div className="passport-details"><p>The factory created this vault, holds the Cleanverse registrar role, registered the vault's RuleV2 pool and CVI, and issued Passport #1. The amount cap applies to each transfer call until the passport expires or is revoked.</p></div>}
+          {expanded && <div className="passport-details"><p>The recorded evidence shows that the factory created this vault, held the Cleanverse registrar role, registered the vault's RuleV2 pool and CVI, and issued Passport #1. The live preflight checks the deployed contract. The amount cap applies to each transfer call until the passport expires or is revoked.</p></div>}
         </article>
 
         <aside className="action-panel" aria-label="Transfer preflight">
@@ -147,11 +147,11 @@ export function ContractPassport() {
           <section className="preflight-summary" aria-labelledby="preflight-title">
             <div className="preflight-title"><h3 id="preflight-title">Deterministic preflight</h3><button type="button" className="icon-button" onClick={refreshStatus} disabled={isRefreshing} aria-label="Refresh Cleanverse CVI state"><RefreshIcon size={16} /></button></div>
             <ul>
-              <li className={cviState === "registered" ? "verified" : "blocked"}><StateIcon state={cviState === "registered" ? "verified" : "blocked"} /><span>Principal CVI <small>{cviState === "registered" ? "active" : "not confirmed"}</small></span></li>
-              <li className="verified"><CheckIcon size={16} /><span>Factory vault <small>confirmed</small></span></li>
-              <li className="verified"><CheckIcon size={16} /><span>Registrar role <small>confirmed</small></span></li>
-              <li className="verified"><CheckIcon size={16} /><span>Validator pool <small>registered</small></span></li>
-              <li className="verified"><CheckIcon size={16} /><span>Per-transfer cap <small>{principalPassport.cap}</small></span></li>
+              <li className={cviState === "registered" ? "verified" : cviState === "snapshot" ? "historical" : "blocked"}><StateIcon state={cviState === "unavailable" ? "blocked" : "verified"} /><span>Principal CVI <small>{cviState === "registered" ? "live confirmed" : cviState === "snapshot" ? "recorded proof" : "not confirmed"}</small></span></li>
+              <li className="historical"><CheckIcon size={16} /><span>Factory vault <small>recorded proof</small></span></li>
+              <li className="historical"><CheckIcon size={16} /><span>Registrar role <small>recorded proof</small></span></li>
+              <li className="historical"><CheckIcon size={16} /><span>Validator pool <small>recorded proof</small></span></li>
+              <li className="historical"><CheckIcon size={16} /><span>Per-transfer cap <small>{principalPassport.cap}</small></span></li>
               <li className="muted"><span className="dot" /><span>{recipientState}</span></li>
             </ul>
             <p className="refresh-message" aria-live="polite">{isRefreshing ? "Refreshing Cleanverse status…" : refreshMessage}</p>
@@ -169,7 +169,7 @@ export function ContractPassport() {
       </section>
 
       <section className="evidence-section" id="evidence" aria-labelledby="evidence-title">
-        <div className="section-heading"><div><p>Evidence timeline</p><h2 id="evidence-title">What Principal has proved</h2></div><span>Verified snapshot · Aug 9, 2026</span></div>
+        <div className="section-heading"><div><p>Evidence timeline</p><h2 id="evidence-title">Recorded testnet proof</h2></div><span>Historical snapshot · Aug 9, 2026</span></div>
         <ol className="timeline">
           {principalPassport.evidence.map((item) => <li key={item.title} className={item.state}>
             <span className="timeline-marker"><StateIcon state={item.state} /></span>
