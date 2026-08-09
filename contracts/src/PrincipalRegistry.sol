@@ -163,7 +163,8 @@ contract PrincipalRegistry is Ownable, IPrincipalRegistry {
             return Decision.VALIDATOR_UNAVAILABLE;
         }
 
-        try validator.complianceVerify(passport.asset, recipient) returns (bool recipientEligible) {
+        // The CCP Validator verifies registered pools. CVA independently enforces recipient CVI during safeTransfer.
+        try validator.complianceVerify(vault, recipient) returns (bool recipientEligible) {
             if (!recipientEligible) return Decision.RECIPIENT_INELIGIBLE;
         } catch {
             return Decision.VALIDATOR_UNAVAILABLE;

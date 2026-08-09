@@ -35,7 +35,7 @@ contract PrincipalRegistryTest is Test {
         vm.prank(PRINCIPAL);
         registry.registerVaultCvi(address(vault));
         validator.setEligible(address(vault), PRINCIPAL, true);
-        validator.setEligible(address(token), RECIPIENT, true);
+        validator.setEligible(address(vault), RECIPIENT, true);
     }
 
     function test_registeredPassportBindsControllerCodeAssetAndNonce() external {
@@ -102,7 +102,7 @@ contract PrincipalRegistryTest is Test {
 
     function test_recipientIneligibilityBlocksWithoutMovingFunds() external {
         uint256 passportId = _registerPassport();
-        validator.setEligible(address(token), RECIPIENT, false);
+        validator.setEligible(address(vault), RECIPIENT, false);
 
         vm.prank(PRINCIPAL);
         bool moved = vault.transferWithinMandate(RECIPIENT, 25e6, passportId);
