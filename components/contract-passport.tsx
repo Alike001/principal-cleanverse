@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { principalPassport, type EvidenceItem } from "@/lib/principal/passport";
-import { ArrowIcon, AssetIcon, BlockIcon, CheckIcon, CopyIcon, ExternalIcon, PersonIcon, RefreshIcon, VaultIcon } from "./icons";
+import { ArrowIcon, AssetIcon, BlockIcon, CheckIcon, CopyIcon, ExternalIcon, Mark, PersonIcon, RefreshIcon, VaultIcon } from "./icons";
 
 function StateIcon({ state }: { state: EvidenceItem["state"] | "blocked" | "verified" }) {
   return state === "verified" ? <CheckIcon size={16} /> : <BlockIcon size={16} />;
@@ -99,7 +99,7 @@ export function ContractPassport() {
           <div className="passport-header">
             <div>
               <p className="passport-kicker">Contract passport</p>
-              <h1>Principal</h1>
+              <div className="passport-product-title"><Mark size={32} /><h1>Principal</h1></div>
               <p className="passport-subtitle">Revocable authority for a verified asset contract.</p>
             </div>
             <div className="passport-header-meta">

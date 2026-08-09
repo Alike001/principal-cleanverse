@@ -20,4 +20,12 @@ describe("principal passport snapshot", () => {
     expect(principalPassport.codeHash).toBe("0x7a82…39edee");
     expect(principalPassport.expiry).toBe("2026-08-16 17:04 UTC");
   });
+
+  it("links the active Passport #2 renewal receipt", () => {
+    expect(principalPassport.evidence).toContainEqual(expect.objectContaining({
+      title: "Passport #2 renewed",
+      reference: "Passport tx 0xfb58…a4d8",
+      href: "https://testnet.monadscan.com/tx/0xfb5882599ea6bd7ae77fbbd5fe728bf3e4c3d8972b48378a67eee2aba0a7a4d8",
+    }));
+  });
 });

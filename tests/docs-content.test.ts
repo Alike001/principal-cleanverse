@@ -33,4 +33,9 @@ describe("public product navigation", () => {
     expect(workspace).toContain("The live preflight is the source of truth");
     expect(workspace).toContain("Historical snapshot · Aug 9, 2026");
   });
+
+  it("places the Principal mark beside the Contract Passport title", () => {
+    expect(workspace).toContain('className="passport-product-title"');
+    expect(workspace).toContain("<Mark size={32} /><h1>Principal</h1>");
+  });
 });

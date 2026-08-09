@@ -41,10 +41,11 @@ export const principalPassport = {
       href: "https://testnet.monadscan.com/address/0xcf145f0730989137cce3b94863490e6ac0f84c8b",
     },
     {
-      title: "Registrar authority confirmed",
-      detail: "The factory holds the Validator REGISTER_ROLE required for pool registration.",
+      title: "Passport #2 renewed",
+      detail: "The principal renewed the same vault mandate with its 0.10 aUSDC per-transfer cap through Aug. 16, 2026.",
       state: "verified" as const,
-      reference: "Onchain role check: true",
+      reference: "Passport tx 0xfb58…a4d8",
+      href: "https://testnet.monadscan.com/tx/0xfb5882599ea6bd7ae77fbbd5fe728bf3e4c3d8972b48378a67eee2aba0a7a4d8",
     },
     {
       title: "Pool and vault CVI verified",
