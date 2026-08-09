@@ -21,7 +21,7 @@ export function PrincipalLanding() {
     <header className="site-header">
       <a className="site-brand" href="#top" aria-label="Principal home"><Mark /><span>Principal</span></a>
       <nav className="site-nav" aria-label="Primary navigation">
-        <a href="#how-it-works">How it works</a><a href="#protocol">Protocol</a><a href="#evidence">Evidence</a><a href="https://docs.cleanverse.com" target="_blank" rel="noreferrer">Docs</a>
+        <a href="#how-it-works">How it works</a><a href="#protocol">Protocol</a><a href="#evidence">Evidence</a><a href="/docs">Docs</a>
       </nav>
       <a className="workspace-button" href="/workspace">Open workspace <ArrowIcon size={16} /></a>
     </header>
@@ -69,7 +69,7 @@ export function PrincipalLanding() {
         </div>
       </section>
 
-      <section className="workspace-intro" aria-labelledby="workspace-title"><div><p>Product workspace</p><h2 id="workspace-title">Inspect the authority, then act.</h2></div><div><p>The separate workspace keeps every live claim narrow: the verified principal, deployed factory and vault, Cleanverse CVA target, and the current pool-registration block.</p><a className="workspace-text-link" href="/workspace">Open the read-only workspace <ArrowIcon size={16} /></a></div></section>
+      <section className="workspace-intro" aria-labelledby="workspace-title"><div><p>Product workspace</p><h2 id="workspace-title">Inspect the authority, then act.</h2></div><div><p>See the exact controller, vault, rule state, and current transfer decision.</p><a className="workspace-text-link" href="/workspace">Open the read-only workspace <ArrowIcon size={16} /></a></div></section>
     </main>
   </>;
 }
