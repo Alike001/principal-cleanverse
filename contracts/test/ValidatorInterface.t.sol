@@ -13,11 +13,20 @@ contract ValidatorInterfaceTest is Test {
 
     function test_preservesPublishedRuleTupleLayout() external pure {
         IAPassComplianceValidator.RuleV2 memory rule = IAPassComplianceValidator.RuleV2({
-            allowedGroup: hex"4142", allowedSubGroup: bytes2(0), minTier: 1, minSubTier: 0, poolCountryBitmap: 0
+            allowedGroup: hex"4142",
+            allowedSubGroup: bytes2(0),
+            minTier: 1,
+            minSubTier: 0,
+            isBlackList: false,
+            countryBitmap: 0
         });
 
         bytes memory encoded = abi.encode(rule);
-        assertEq(encoded.length, 160, "RuleV2 must remain five ABI words");
+        assertEq(encoded.length, 192, "RuleV2 must remain six ABI words");
+        assertEq(
+            IAPassComplianceValidator.registerV2.selector,
+            bytes4(keccak256("registerV2(address,(bytes2,bytes2,uint8,uint8,bool,uint256))"))
+        );
     }
 
     function test_usesExpectedComplianceVerificationSelector() external pure {

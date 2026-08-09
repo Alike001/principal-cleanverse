@@ -228,7 +228,12 @@ contract PrincipalRegistryTest is Test {
 
     function _rule() private pure returns (IAPassComplianceValidator.RuleV2 memory) {
         return IAPassComplianceValidator.RuleV2({
-            allowedGroup: bytes2(0), allowedSubGroup: bytes2(0), minTier: 0, minSubTier: 0, poolCountryBitmap: 0
+            allowedGroup: bytes2(0),
+            allowedSubGroup: bytes2(0),
+            minTier: 0,
+            minSubTier: 0,
+            isBlackList: false,
+            countryBitmap: 0
         });
     }
 }
