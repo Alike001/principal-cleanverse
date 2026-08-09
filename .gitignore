@@ -39,3 +39,4 @@ research-intake.md
 # Editor and operating system files
 .DS_Store
 *.swp
+.vercel
