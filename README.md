@@ -2,6 +2,8 @@
 
 Principal makes the controller of a smart contract explicit before it can move a Cleanverse Verified Asset. It binds one verified CVI principal, one immutable vault, one aUSDC action, a per-transfer cap, expiry, and a deterministic onchain decision.
 
+Live demo: [cleanverse-two.vercel.app](https://cleanverse-two.vercel.app)
+
 ## Recorded Monad testnet proof
 
 - On Aug. 9, 2026, Cleanverse A-Pass and CVA checks permitted the recorded Principal flow. The web app labels this as historical proof. Its live read-only preflight is the source of truth for the current decision.

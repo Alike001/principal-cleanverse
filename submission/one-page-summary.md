@@ -1,5 +1,7 @@
 # Principal
 
+Live demo: https://cleanverse-two.vercel.app
+
 ## Problem
 
 Cleanverse CVI verifies wallets and CVA protects transfers, but a smart contract can still move institutional assets without making its accountable controller and exact deployed code easy to verify.
