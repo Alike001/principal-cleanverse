@@ -23,7 +23,7 @@ export default function DocsPage() {
       <article>
         <span>02</span>
         <h2>Live testnet state</h2>
-        <p>The principal, factory, and vault are live. A 0.05 aUSDC transfer was permitted through Passport #1 and returned from the vault on Monad.</p>
+        <p>The principal, factory, and vault are live. Passport #2 is the active mandate, while Passport #1 records the completed 0.05 aUSDC transfer proof on Monad.</p>
       </article>
       <article>
         <span>03</span>

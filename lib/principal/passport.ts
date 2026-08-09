@@ -12,9 +12,9 @@ export type EvidenceItem = {
 // It is not an indexer and must never override a fresh onchain or Cleanverse read.
 export const principalPassport = {
   chain: "Monad testnet",
-  passportId: "#1",
-  state: "Historical testnet proof" as const,
-  statusDetail: "On Aug. 9, 2026, Passport #1 permitted a 0.05 aUSDC transfer from the CVI-registered vault back to the verified principal on Monad.",
+  passportId: "#2",
+  state: "Renewed testnet passport" as const,
+  statusDetail: "On Aug. 9, 2026, Passport #2 renewed the same vault mandate through Aug. 16. Passport #1 remains the recorded 0.05 aUSDC transfer proof.",
   principal: "CVI verified in recorded proof",
   registry: "0xcf14…4c8B",
   registryAddress: "0xcf145f0730989137cce3b94863490e6ac0f84c8b",
@@ -24,7 +24,7 @@ export const principalPassport = {
   asset: "aUSDC · 0xaC08…1f20D",
   authority: "aUSDC transfer calls, per-call capped",
   cap: "0.10 aUSDC per transfer",
-  expiry: "2026-08-10 14:00 UTC",
+  expiry: "2026-08-16 17:04 UTC",
   nonce: "0",
   evidence: [
     {

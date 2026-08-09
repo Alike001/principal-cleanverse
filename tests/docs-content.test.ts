@@ -29,6 +29,7 @@ describe("public product navigation", () => {
 
   it("keeps recorded proof separate from the live preflight", () => {
     expect(workspace).toContain("status-historical");
+    expect(workspace).toContain("active Passport #2");
     expect(workspace).toContain("The live preflight is the source of truth");
     expect(workspace).toContain("Historical snapshot · Aug 9, 2026");
   });

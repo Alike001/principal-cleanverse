@@ -20,7 +20,7 @@ Principal is a Monad contract-identity primitive. It binds one CVI-verified prin
 - Factory: `0xcf145f0730989137cce3b94863490e6ac0f84c8b`.
 - Factory-created vault: `0x0355E4c81d0bD4212A1c0402E0438DCd7ED52837`.
 - Factory role: confirmed `REGISTER_ROLE` onchain.
-- Validator pool: registered on Monad. Vault CVI for aUSDC: registered on Monad. Passport #1: issued with a 0.10 aUSDC per-transfer cap. CVA proof: 0.05 aUSDC entered the vault and was returned through the permitted vault action. Final vault balance: zero.
+- Validator pool: registered on Monad. Vault CVI for aUSDC: registered on Monad. Active Passport #2: issued with a 0.10 aUSDC per-transfer cap through Aug. 16, 2026 at 17:04 UTC. CVA proof: Passport #1 permitted 0.05 aUSDC to enter and return from the vault. Final vault balance: zero.
 
 ## Why it matters
 

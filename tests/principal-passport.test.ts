@@ -3,8 +3,8 @@ import { principalPassport } from "../lib/principal/passport";
 
 describe("principal passport snapshot", () => {
   it("reports the completed passport-controlled transfer proof", () => {
-    expect(principalPassport.state).toBe("Historical testnet proof");
-    expect(principalPassport.statusDetail).toContain("0.05 aUSDC transfer");
+    expect(principalPassport.state).toBe("Renewed testnet passport");
+    expect(principalPassport.statusDetail).toContain("Passport #2 renewed");
     expect(principalPassport.evidence.at(-1)).toMatchObject({
       title: "Passport transfer verified",
       state: "verified",
@@ -18,6 +18,6 @@ describe("principal passport snapshot", () => {
     expect(principalPassport.principal).toBe("CVI verified in recorded proof");
     expect(principalPassport.principal).not.toMatch(/^0x[0-9a-f]{40}$/i);
     expect(principalPassport.codeHash).toBe("0x7a82…39edee");
-    expect(principalPassport.expiry).toBe("2026-08-10 14:00 UTC");
+    expect(principalPassport.expiry).toBe("2026-08-16 17:04 UTC");
   });
 });

@@ -46,6 +46,6 @@ The contract suite covers factory provenance, one-vault creation, principal elig
 
 Onchain state holds factory provenance, vault ownership, code binding, the passport mandate, and transfer enforcement. Cleanverse CVI and CVA remain the source of identity and asset eligibility. Server-only code calls the Cleanverse API. The browser receives only safe status summaries and reviewed public evidence.
 
-Passport #1 allows up to `0.10 aUSDC` in each transfer call until it expires or is revoked. It is not a cumulative spending budget.
+Passport #2 allows up to `0.10 aUSDC` in each transfer call until Aug. 16, 2026 at 17:04 UTC or until it is revoked. It is not a cumulative spending budget. Passport #1 remains the public receipt for the completed 0.05 aUSDC transfer proof.
 
 Principal does not claim to prove legal ownership, custody, licensing, or regulatory approval.

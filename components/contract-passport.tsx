@@ -34,7 +34,7 @@ export function ContractPassport() {
     decision?: string;
     permitted?: boolean;
     message: string;
-  }>({ state: "idle", message: "Enter a recipient and amount to query Passport #1 on Monad." });
+  }>({ state: "idle", message: "Enter a recipient and amount to query the active Passport #2 on Monad." });
 
   async function refreshStatus() {
     setIsRefreshing(true);
@@ -131,7 +131,7 @@ export function ContractPassport() {
           </div>
 
           <div className="passport-footer"><span>Chain: {principalPassport.chain}</span><button type="button" className="text-button" onClick={() => setExpanded(!expanded)}>{expanded ? "Hide evidence details" : "Show evidence details"}</button></div>
-          {expanded && <div className="passport-details"><p>The recorded evidence shows that the factory created this vault, held the Cleanverse registrar role, registered the vault's RuleV2 pool and CVI, and issued Passport #1. The live preflight checks the deployed contract. The amount cap applies to each transfer call until the passport expires or is revoked.</p></div>}
+          {expanded && <div className="passport-details"><p>The recorded evidence shows that the factory created this vault, held the Cleanverse registrar role, registered the vault's RuleV2 pool and CVI, and issued Passport #1. Passport #2 renewed the same mandate. The live preflight checks the deployed contract. The amount cap applies to each transfer call until the passport expires or is revoked.</p></div>}
         </article>
 
         <aside className="action-panel" aria-label="Transfer preflight">

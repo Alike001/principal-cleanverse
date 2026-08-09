@@ -84,41 +84,39 @@ export async function evaluatePrincipalPassport(
   const amountUnits = parseAssetAmount(amount);
   const data = encodeEvaluateCall(recipient, amountUnits);
 
-  let response: Response;
-  try {
-    response = await fetcher(rpcUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "eth_call",
-        params: [{ to: principalDeployment.factoryAddress, data }, "latest"],
-      }),
-      cache: "no-store",
-      signal: AbortSignal.timeout(10_000),
-    });
-  } catch {
-    throw new PrincipalRpcError("Monad evaluation is temporarily unavailable.");
+  const rpcUrls = [...new Set([rpcUrl, principalDeployment.rpcUrl])];
+  let result: unknown;
+
+  for (const candidateRpcUrl of rpcUrls) {
+    try {
+      const response = await fetcher(candidateRpcUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "eth_call",
+          params: [{ to: principalDeployment.factoryAddress, data }, "latest"],
+        }),
+        cache: "no-store",
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!response.ok) continue;
+
+      const payload: unknown = await response.json();
+      if (!payload || typeof payload !== "object" || "error" in payload) continue;
+
+      const candidateResult = (payload as { result?: unknown }).result;
+      if (typeof candidateResult === "string" && /^0x[0-9a-fA-F]{64}$/.test(candidateResult)) {
+        result = candidateResult;
+        break;
+      }
+    } catch {
+      continue;
+    }
   }
 
-  if (!response.ok) throw new PrincipalRpcError("Monad evaluation is temporarily unavailable.");
-
-  let payload: unknown;
-  try {
-    payload = await response.json();
-  } catch {
-    throw new PrincipalRpcError("Monad returned an unreadable evaluation response.");
-  }
-
-  if (!payload || typeof payload !== "object" || "error" in payload) {
-    throw new PrincipalRpcError("Monad rejected the evaluation request.");
-  }
-
-  const result = (payload as { result?: unknown }).result;
-  if (typeof result !== "string" || !/^0x[0-9a-fA-F]{64}$/.test(result)) {
-    throw new PrincipalRpcError("Monad returned an invalid evaluation result.");
-  }
+  if (typeof result !== "string") throw new PrincipalRpcError("Monad evaluation is temporarily unavailable.");
 
   const decisionIndex = Number(BigInt(result));
   const decision = principalDecisionNames[decisionIndex];

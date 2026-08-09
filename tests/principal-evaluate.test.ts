@@ -26,7 +26,7 @@ describe("Principal live preflight", () => {
     expect(() => parseAssetAmount(amount)).toThrow(PrincipalInputError);
   });
 
-  it("encodes the deployed Passport #1 evaluate call", () => {
+  it("encodes the deployed Passport #2 evaluate call", () => {
     const call = encodeEvaluateCall(principalDeployment.vaultAddress, 50_000n);
     expect(call).toHaveLength(2 + 8 + 64 * 4);
     expect(call).toMatch(/^0x7e8e89cb/);
@@ -66,5 +66,22 @@ describe("Principal live preflight", () => {
         vi.fn().mockResolvedValue(rpcResponse("0x01")),
       ),
     ).rejects.toBeInstanceOf(PrincipalRpcError);
+  });
+
+  it("falls back to the documented Monad RPC when an override is unavailable", async () => {
+    const fetcher = vi.fn()
+      .mockRejectedValueOnce(new Error("override unavailable"))
+      .mockResolvedValueOnce(rpcResponse(`0x${"0".repeat(64)}`));
+
+    const result = await evaluatePrincipalPassport(
+      principalDeployment.vaultAddress,
+      "0.05",
+      fetcher,
+      "https://stale-rpc.example",
+    );
+
+    expect(result.decision).toBe("PERMITTED");
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fetcher.mock.calls[1]?.[0]).toBe(principalDeployment.rpcUrl);
   });
 });
