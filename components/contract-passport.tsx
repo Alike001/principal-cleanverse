@@ -77,7 +77,7 @@ export function ContractPassport() {
               <p className="passport-subtitle">Revocable authority for a verified asset contract.</p>
             </div>
             <div className="passport-header-meta">
-              <span className="passport-id">{principalPassport.passportId}</span>
+              <span className="passport-id">Passport: {principalPassport.passportId}</span>
               <div className="status status-blocked"><BlockIcon size={16} />{principalPassport.state}</div>
             </div>
           </div>
@@ -87,7 +87,7 @@ export function ContractPassport() {
           <dl className="passport-grid">
             <PassportField label="Verified principal" tone={cviState === "registered" ? "blue" : "muted"}><span className="inline-icon"><PersonIcon size={16} />{cviState === "registered" ? principalPassport.principal : "CVI state unavailable"}</span></PassportField>
             <PassportField label="Vault"><CopyValue label="vault address" display={principalPassport.vault} value={principalPassport.vaultAddress} /></PassportField>
-            <PassportField label="Registry"><CopyValue label="registry address" display={principalPassport.registry} value={principalPassport.registryAddress} /></PassportField>
+            <PassportField label="Factory"><CopyValue label="factory address" display={principalPassport.registry} value={principalPassport.registryAddress} /></PassportField>
             <PassportField label="Runtime code hash"><span className="muted-value">{principalPassport.codeHash}</span></PassportField>
             <PassportField label="CVA"><span className="inline-icon"><AssetIcon size={16} />{principalPassport.asset}</span></PassportField>
             <PassportField label="Permitted action"><span>{principalPassport.authority}</span></PassportField>
@@ -105,7 +105,7 @@ export function ContractPassport() {
           </div>
 
           <div className="passport-footer"><span>Chain: {principalPassport.chain}</span><button type="button" className="text-button" onClick={() => setExpanded(!expanded)}>{expanded ? "Hide evidence details" : "Show evidence details"}</button></div>
-          {expanded && <div className="passport-details"><p>The registry and vault are on Monad testnet. The Cleanverse Validator has not accepted the vault as a registered pool, so Principal refuses to attempt a CVA transfer.</p></div>}
+          {expanded && <div className="passport-details"><p>The factory and vault are on Monad testnet. The Cleanverse Validator has not accepted the vault as a registered pool, so Principal refuses to issue a passport or attempt a CVA transfer.</p></div>}
         </article>
 
         <aside className="action-panel" aria-label="Transfer preflight">
@@ -122,7 +122,7 @@ export function ContractPassport() {
             <div className="preflight-title"><h3 id="preflight-title">Deterministic preflight</h3><button type="button" className="icon-button" onClick={refreshStatus} disabled={isRefreshing} aria-label="Refresh Cleanverse CVI state"><RefreshIcon size={16} /></button></div>
             <ul>
               <li className={cviState === "registered" ? "verified" : "blocked"}><StateIcon state={cviState === "registered" ? "verified" : "blocked"} /><span>Principal CVI <small>{cviState === "registered" ? "active" : "not confirmed"}</small></span></li>
-              <li className="verified"><CheckIcon size={16} /><span>Vault deployment <small>confirmed</small></span></li>
+              <li className="verified"><CheckIcon size={16} /><span>Factory vault <small>confirmed</small></span></li>
               <li className="verified"><CheckIcon size={16} /><span>Registrar role <small>confirmed</small></span></li>
               <li className="blocked"><BlockIcon size={16} /><span>Validator pool <small>registration blocked</small></span></li>
               <li className="muted"><span className="dot" /><span>{recipientState}</span></li>
