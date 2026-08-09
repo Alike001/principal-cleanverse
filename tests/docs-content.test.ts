@@ -42,10 +42,10 @@ describe("public product navigation", () => {
     expect(workspace).toContain("<Mark size={32} /><h1>Principal</h1>");
   });
 
-  it("keeps the workspace walletless and puts controller actions on their own route", () => {
+  it("keeps the workspace walletless while retaining an unadvertised controller route", () => {
     expect(workspace).not.toContain("PassportIssuer");
-    expect(workspace).toContain('href="/controller"');
-    expect(workspaceRoute).toContain('href="/controller"');
+    expect(workspace).not.toContain('href="/controller"');
+    expect(workspaceRoute).not.toContain('href="/controller"');
     expect(controllerRoute).toContain("<PassportIssuer />");
     expect(controllerRoute).toContain("Owner-only controls");
     expect(controllerRoute).toContain('href="/workspace"');

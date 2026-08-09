@@ -168,7 +168,7 @@ export function ContractPassport() {
 
   return (
     <section className="workspace-shell" id="workspace" aria-labelledby="workspace-surface-title">
-      <div className="workspace-heading"><div><p>Principal workspace</p><h2 id="workspace-surface-title">Contract Passport</h2></div><div className="workspace-heading-actions"><span><i />Monad testnet</span><a className="workspace-controller-link" href="/controller">Vault controller tools <ArrowIcon size={14} /></a></div></div>
+      <div className="workspace-heading"><div><p>Principal workspace</p><h2 id="workspace-surface-title">Contract Passport</h2></div><span><i />Monad testnet</span></div>
       <section className="workspace" aria-label="Principal contract passport">
         <article className="passport" id="passport">
           <div className="passport-header">
