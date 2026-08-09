@@ -1,6 +1,6 @@
 # Principal
 
-Live demo: https://cleanverse-two.vercel.app
+Live demo: https://principal.vercel.app
 
 ## Problem
 
