@@ -17,6 +17,12 @@ import type {
   ValidatorGrantRequest,
   ValidatorGrantResponse,
 } from "./types";
+import {
+  parseAPassRecord,
+  parseDepositATokenList,
+  parseGenerateAPassResponse,
+  parseValidatorGrantResponse,
+} from "./validate.server";
 
 type FetchLike = typeof fetch;
 
@@ -39,22 +45,27 @@ export class CleanverseClient {
   ) {}
 
   async queryDepositATokenList(chain: "monad" = "monad"): Promise<DepositATokenList> {
-    return this.request<DepositATokenList>("/query_deposit_atoken_list", { chain });
+    return this.request("/query_deposit_atoken_list", { chain }, false, parseDepositATokenList);
   }
 
   async queryAPass(chain: "monad", address: string): Promise<APassRecord> {
-    return this.request<APassRecord>("/query_apass", { chain, address });
+    return this.request("/query_apass", { chain, address }, false, parseAPassRecord);
   }
 
   async generateAPass(payload: GenerateAPassRequest): Promise<GenerateAPassResponse> {
-    return this.request<GenerateAPassResponse>("/generate_apass", payload, true);
+    return this.request("/generate_apass", payload, true, parseGenerateAPassResponse);
   }
 
   async grantValidatorRegistrar(payload: ValidatorGrantRequest): Promise<ValidatorGrantResponse> {
-    return this.request<ValidatorGrantResponse>("/validator/grant", payload, true);
+    return this.request("/validator/grant", payload, true, parseValidatorGrantResponse);
   }
 
-  private async request<T>(path: string, body: unknown, encrypted = false): Promise<T> {
+  private async request<T>(
+    path: string,
+    body: unknown,
+    encrypted: boolean,
+    parseData: (value: unknown) => T,
+  ): Promise<T> {
     const requestBody = encrypted
       ? { data: encryptCleanversePayload(body, this.config.apiKey) }
       : body;
@@ -72,8 +83,12 @@ export class CleanverseClient {
         cache: "no-store",
         signal: AbortSignal.timeout(this.timeoutMs),
       });
-    } catch (cause) {
-      throw new CleanverseTransportError(`Cleanverse request failed: ${String(cause)}`);
+    } catch {
+      throw new CleanverseTransportError("Cleanverse request failed or timed out.");
+    }
+
+    if (!response.ok) {
+      throw new CleanverseTransportError(`Cleanverse returned HTTP ${response.status}.`);
     }
 
     let json: unknown;
@@ -87,14 +102,10 @@ export class CleanverseClient {
       throw new CleanverseMalformedResponseError("Cleanverse returned an invalid response envelope.");
     }
 
-    if (!response.ok) {
-      throw new CleanverseTransportError(`Cleanverse returned HTTP ${response.status}.`);
-    }
-
     if (json.code !== "0000") {
       throw new CleanverseResponseError(json.message, json.code);
     }
 
-    return json.data as T;
+    return parseData(json.data);
   }
 }

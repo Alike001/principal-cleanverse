@@ -29,7 +29,11 @@ export async function getMonadPrincipalStatus(
     await client.queryAPass("monad", principalAddress);
     principalCvi = "registered";
   } catch (error) {
-    if (error instanceof CleanverseResponseError && error.code === "0002") {
+    if (
+      error instanceof CleanverseResponseError
+      && error.code === "0002"
+      && /CN_001|A-Pass not found|does not have APass/i.test(error.message)
+    ) {
       principalCvi = "not_registered";
     } else {
       throw error;
