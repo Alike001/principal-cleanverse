@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { principalDeployment } from "@/lib/principal/deployment";
 import { createPassportLink } from "@/lib/principal/passport-link";
 import { principalPassport, type EvidenceItem } from "@/lib/principal/passport";
+import { formatUnixTimestamp } from "@/lib/principal/time";
 import { ArrowIcon, AssetIcon, BlockIcon, CheckIcon, CopyIcon, ExternalIcon, Mark, PersonIcon, RefreshIcon, VaultIcon } from "./icons";
 
 type LivePassport = {
@@ -39,12 +40,6 @@ function formatUnits(value: string, suffix = "aUSDC per transfer") {
 function remainingAllowance(passport: LivePassport) {
   if (passport.spent === null) return null;
   return (BigInt(passport.totalAllowance) - BigInt(passport.spent)).toString();
-}
-
-function formatExpiry(value: string) {
-  const timestamp = BigInt(value);
-  if (timestamp > BigInt(Number.MAX_SAFE_INTEGER / 1000)) return "Unrepresentable timestamp";
-  return new Date(Number(timestamp) * 1000).toISOString().replace("T", " ").replace(".000Z", " UTC");
 }
 
 function CopyValue({ value, display, label }: { value: string; display: string; label: string }) {
@@ -195,7 +190,7 @@ export function ContractPassport() {
             <PassportField label="Permitted action"><span>{passport ? passport.spent === null ? "CVA transfer calls, per-call capped" : "CVA transfer calls, cumulatively bounded" : principalPassport.authority}</span></PassportField>
             <PassportField label={passport && passport.spent !== null ? "Total allowance" : "Per-transfer cap"}><span className="mono">{passport ? formatUnits(passport.totalAllowance, passport.spent === null ? "aUSDC per transfer" : "aUSDC total") : principalPassport.cap}</span></PassportField>
             {passport && passport.spent !== null && <PassportField label="Remaining allowance"><span className="mono">{formatUnits(remainingAllowance(passport) || "0", "aUSDC available")}</span></PassportField>}
-            <PassportField label="Expiry"><span>{passport ? formatExpiry(passport.expiry) : principalPassport.expiry}</span></PassportField>
+            <PassportField label="Expiry"><span>{passport ? formatUnixTimestamp(passport.expiry) : principalPassport.expiry}</span></PassportField>
             <PassportField label="Nonce"><span className="mono">{passport?.nonce || principalPassport.nonce}</span></PassportField>
           </dl>
 
