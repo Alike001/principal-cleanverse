@@ -36,13 +36,13 @@ export function MonadTestnetSetup() {
       ? "Install an EVM wallet extension, then return to add Monad Testnet."
       : state === "failed"
         ? "Your wallet did not add the network. Try again or use the official Monad guide."
-        : "Adding the network never reveals a private key or connects an account to Principal.";
+        : "This adds the network only. It does not connect an account to Principal.";
 
   return <section className="testnet-setup" aria-labelledby="testnet-setup-title">
     <div>
       <p>Testnet setup</p>
-      <h2 id="testnet-setup-title">Set up Monad once, from here.</h2>
-      <p>Use testnet MON only for gas. Principal stays read-only until a real signed product action is available.</p>
+      <h2 id="testnet-setup-title">Add Monad Testnet.</h2>
+      <p>Testnet MON pays gas. Principal stays read-only until the Validator pool is registered.</p>
     </div>
     <div className="testnet-setup-actions">
       <button type="button" className="workspace-button" onClick={handleAddNetwork} disabled={state === "adding"}>

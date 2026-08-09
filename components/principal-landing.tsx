@@ -21,7 +21,7 @@ export function PrincipalLanding() {
     <header className="site-header">
       <a className="site-brand" href="#top" aria-label="Principal home"><Mark /><span>Principal</span></a>
       <nav className="site-nav" aria-label="Primary navigation">
-        <a href="#how-it-works">How it works</a><a href="#protocol">Protocol</a><a href="#evidence">Evidence</a><a href="/docs">Docs</a>
+        <a href="#how-it-works">How it works</a><a href="#protocol">Protocol</a><a href="/docs#public-evidence">Evidence</a><a href="/docs">Docs</a>
       </nav>
       <a className="workspace-button" href="/workspace">Open workspace <ArrowIcon size={16} /></a>
     </header>
